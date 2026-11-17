@@ -15,10 +15,19 @@ class AppTheme {
 
     final bool isLight = brightness == Brightness.light;
 
-    return ThemeData(
+    final ThemeData baseTheme = ThemeData(
       useMaterial3: true,
       brightness: brightness,
       colorScheme: colorScheme,
+      fontFamily: 'Manrope',
+    );
+
+    final TextTheme manropeTextTheme = baseTheme.textTheme.apply(
+      fontFamily: 'Manrope',
+    );
+
+    return baseTheme.copyWith(
+      textTheme: manropeTextTheme,
 
       scaffoldBackgroundColor: isLight
           ? const Color(0xFFF4F7F6)
@@ -38,6 +47,34 @@ class AppTheme {
       dividerTheme: DividerThemeData(
         color: colorScheme.outlineVariant,
         thickness: 1,
+      ),
+
+      cardTheme: CardThemeData(
+        elevation: 0,
+        color: colorScheme.surface,
+        surfaceTintColor: Colors.transparent,
+        margin: EdgeInsets.zero,
+      ),
+
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: colorScheme.surface,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: colorScheme.outlineVariant),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: colorScheme.outlineVariant),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+        ),
       ),
 
       visualDensity: VisualDensity.standard,

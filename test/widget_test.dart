@@ -3,65 +3,184 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:rumboapp/app/app.dart';
-import 'package:rumboapp/core/providers/theme_mode_provider.dart';
+import 'package:rumboapp/core/providers/app_settings_provider.dart';
+
+class _MemoryAppSettingsController extends AppSettingsController {
+  final AppSettings initialSettings;
+
+  _MemoryAppSettingsController(this.initialSettings);
+
+  @override
+  Future<AppSettings> build() async {
+    return initialSettings;
+  }
+
+  @override
+  Future<void> completeOnboarding() async {
+    final currentSettings = state.requireValue;
+
+    state = AsyncData(currentSettings.copyWith(onboardingCompleted: true));
+  }
+
+  @override
+  Future<void> setThemeMode(ThemeMode themeMode) async {
+    final currentSettings = state.requireValue;
+
+    state = AsyncData(currentSettings.copyWith(themeMode: themeMode));
+  }
+}
 
 void main() {
-  group('Rumbo', () {
-    testWidgets('Muestra correctamente la pantalla de inicio', (
+  Future<ProviderContainer> createTestContainer({
+    bool onboardingCompleted = false,
+    ThemeMode themeMode = ThemeMode.system,
+  }) async {
+    final container = ProviderContainer(
+      overrides: [
+        appSettingsProvider.overrideWith(
+          () => _MemoryAppSettingsController(
+            AppSettings(
+              onboardingCompleted: onboardingCompleted,
+              themeMode: themeMode,
+            ),
+          ),
+        ),
+      ],
+    );
+
+    // Esperar a que Riverpod termine de recuperar las preferencias.
+    await container.read(appSettingsProvider.future);
+
+    return container;
+  }
+
+  Future<void> launchApp(
+    WidgetTester tester,
+    ProviderContainer container,
+  ) async {
+    await tester.pumpWidget(
+      UncontrolledProviderScope(container: container, child: const RumboApp()),
+    );
+
+    await tester.pumpAndSettle();
+  }
+
+  group('Rumbo - Onboarding', () {
+    testWidgets('Muestra el onboarding al iniciar por primera vez', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const ProviderScope(child: RumboApp()));
+      final container = await createTestContainer();
+
+      addTearDown(container.dispose);
+
+      await launchApp(tester, container);
+
+      expect(find.text('Tus documentos, siempre en orden.'), findsOneWidget);
+
+      expect(find.text('Omitir'), findsOneWidget);
+
+      expect(find.text('Continuar'), findsOneWidget);
+    });
+
+    testWidgets('Permite avanzar a la segunda página', (
+      WidgetTester tester,
+    ) async {
+      final container = await createTestContainer();
+
+      addTearDown(container.dispose);
+
+      await launchApp(tester, container);
+
+      await tester.tap(find.text('Continuar'));
 
       await tester.pumpAndSettle();
 
-      expect(find.text('Rumbo'), findsOneWidget);
+      expect(find.text('Planea mejor tus recorridos.'), findsOneWidget);
+    });
+
+    testWidgets('Permite omitir el onboarding y entrar al inicio', (
+      WidgetTester tester,
+    ) async {
+      final container = await createTestContainer();
+
+      addTearDown(container.dispose);
+
+      await launchApp(tester, container);
+
+      await tester.tap(find.text('Omitir'));
+
+      await tester.pumpAndSettle();
+
       expect(find.text('Hola, viajero'), findsOneWidget);
 
       expect(find.text('Tu próximo viaje, mejor organizado.'), findsOneWidget);
 
-      expect(find.text('Documentos'), findsOneWidget);
-      expect(find.text('Rutas y casetas'), findsOneWidget);
-      expect(find.text('Mis viajes'), findsOneWidget);
+      expect(find.text('Tus documentos, siempre en orden.'), findsNothing);
     });
 
-    testWidgets('Permite navegar a la sección de documentos', (
+    testWidgets('Permite completar las tres páginas del onboarding', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const ProviderScope(child: RumboApp()));
-
-      await tester.pumpAndSettle();
-
-      final documentsTitle = find.text('Documentos').last;
-
-      await tester.ensureVisible(documentsTitle);
-      await tester.pumpAndSettle();
-
-      await tester.tap(documentsTitle);
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text(
-          'Este módulo forma parte del alcance de '
-          'Rumbo y se desarrollará en una siguiente etapa.',
-        ),
-        findsOneWidget,
-      );
-    });
-
-    test('Permite cambiar el tema mediante Riverpod', () {
-      final container = ProviderContainer();
+      final container = await createTestContainer();
 
       addTearDown(container.dispose);
 
-      expect(container.read(themeModeProvider), ThemeMode.system);
+      await launchApp(tester, container);
 
-      container.read(themeModeProvider.notifier).toggle();
+      await tester.tap(find.text('Continuar'));
 
-      expect(container.read(themeModeProvider), ThemeMode.dark);
+      await tester.pumpAndSettle();
 
-      container.read(themeModeProvider.notifier).toggle();
+      expect(find.text('Planea mejor tus recorridos.'), findsOneWidget);
 
-      expect(container.read(themeModeProvider), ThemeMode.light);
+      await tester.tap(find.text('Continuar'));
+
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Calcula cuánto puede costar tu viaje.'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Comenzar'));
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hola, viajero'), findsOneWidget);
+    });
+
+    testWidgets('No muestra onboarding si ya fue completado', (
+      WidgetTester tester,
+    ) async {
+      final container = await createTestContainer(onboardingCompleted: true);
+
+      addTearDown(container.dispose);
+
+      await launchApp(tester, container);
+
+      expect(find.text('Hola, viajero'), findsOneWidget);
+
+      expect(find.text('Tus documentos, siempre en orden.'), findsNothing);
+    });
+  });
+
+  group('Rumbo - Preferencias', () {
+    testWidgets('Permite cambiar el tema desde la pantalla principal', (
+      WidgetTester tester,
+    ) async {
+      final container = await createTestContainer(onboardingCompleted: true);
+
+      addTearDown(container.dispose);
+
+      await launchApp(tester, container);
+
+      expect(find.byTooltip('Cambiar a tema oscuro'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Cambiar a tema oscuro'));
+
+      await tester.pumpAndSettle();
+
+      expect(find.byTooltip('Cambiar a tema claro'), findsOneWidget);
     });
   });
 }

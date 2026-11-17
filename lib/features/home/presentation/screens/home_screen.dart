@@ -34,8 +34,22 @@ class HomeScreen extends ConsumerWidget {
             tooltip: themeMode == ThemeMode.dark
                 ? 'Cambiar a tema claro'
                 : 'Cambiar a tema oscuro',
-            onPressed: () {
-              ref.read(themeModeProvider.notifier).toggle();
+            onPressed: () async {
+              try {
+                await ref.read(themeModeProvider.notifier).toggle();
+              } catch (error) {
+                if (!context.mounted) {
+                  return;
+                }
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'No fue posible guardar el tema seleccionado.',
+                    ),
+                  ),
+                );
+              }
             },
             icon: Icon(
               themeMode == ThemeMode.dark
