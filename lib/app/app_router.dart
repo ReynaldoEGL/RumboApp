@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
 
 import 'app_routes.dart';
-import '../features/home/presentation/screens/home_screen.dart';
-import '../features/shared/presentation/screens/feature_placeholder_screen.dart';
+
+import 'package:rumboapp/features/auth/presentation/screens/login_screen.dart';
+import 'package:rumboapp/features/auth/presentation/screens/register_screen.dart';
+import 'package:rumboapp/features/auth/presentation/screens/forgot_password_screen.dart';
+
+import 'package:rumboapp/features/shared/presentation/screens/feature_placeholder_screen.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case AppRoutes.home:
-        return _createRoute(settings, const HomeScreen());
+      case AppRoutes.login:
+        return _createRoute(settings, const LoginScreen());
+
+      case AppRoutes.register:
+        return _createRoute(settings, const RegisterScreen());
+
+      case AppRoutes.forgotPassword:
+        return _createRoute(settings, const ForgotPasswordScreen());
 
       case AppRoutes.documents:
         return _createRoute(
@@ -28,8 +38,8 @@ class AppRouter {
           const FeaturePlaceholderScreen(
             title: 'Rutas y casetas',
             description:
-                'Aquí podrás consultar recorridos, '
-                'casetas y estimaciones de gastos carreteros.',
+                'Aquí podrás consultar recorridos, casetas '
+                'y estimaciones de gastos carreteros.',
             icon: Icons.route_outlined,
           ),
         );
@@ -40,8 +50,8 @@ class AppRouter {
           const FeaturePlaceholderScreen(
             title: 'Mis viajes',
             description:
-                'Aquí podrás reunir tus itinerarios, '
-                'presupuestos y pendientes de viaje.',
+                'Aquí podrás reunir itinerarios, presupuestos '
+                'y pendientes de viaje.',
             icon: Icons.luggage_outlined,
           ),
         );

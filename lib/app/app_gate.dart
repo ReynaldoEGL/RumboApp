@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rumboapp/core/providers/app_settings_provider.dart';
 import 'package:rumboapp/core/widgets/rumbo_brand.dart';
 
-import 'package:rumboapp/features/home/presentation/screens/home_screen.dart';
+import 'package:rumboapp/features/auth/presentation/auth_gate.dart';
+
 import 'package:rumboapp/features/onboarding/presentation/screens/onboarding_screen.dart';
 
 class AppGate extends ConsumerWidget {
@@ -24,11 +25,11 @@ class AppGate extends ConsumerWidget {
       ),
 
       data: (appSettings) {
-        if (appSettings.onboardingCompleted) {
-          return const HomeScreen();
+        if (!appSettings.onboardingCompleted) {
+          return const OnboardingScreen();
         }
 
-        return const OnboardingScreen();
+        return const AuthGate();
       },
     );
   }
@@ -47,7 +48,9 @@ class _StartupScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const RumboBrand(iconSize: 64, textSize: 30),
+
             const SizedBox(height: 28),
+
             SizedBox(
               width: 26,
               height: 26,

@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rumboapp/app/app_routes.dart';
 import 'package:rumboapp/core/providers/theme_mode_provider.dart';
 
+import 'package:rumboapp/features/auth/application/auth_providers.dart';
+import 'package:rumboapp/features/auth/application/auth_error_message.dart';
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -57,6 +60,25 @@ class HomeScreen extends ConsumerWidget {
                   : Icons.dark_mode_rounded,
             ),
           ),
+
+          IconButton(
+            tooltip: 'Cerrar sesión',
+            onPressed: () async {
+              try {
+                await ref.read(authControllerProvider.notifier).signOut();
+              } catch (error) {
+                if (!context.mounted) {
+                  return;
+                }
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AuthErrorMessage.from(error))),
+                );
+              }
+            },
+            icon: const Icon(Icons.logout_rounded),
+          ),
+
           const SizedBox(width: 8),
         ],
       ),
