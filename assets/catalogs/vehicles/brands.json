@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "vehicle_brands",
+  "catalogRevision": 1,
+  "description": "Catálogo semilla de marcas para Rumbo. No es exhaustivo.",
+  "items": [
+    {
+      "id": "toyota",
+      "name": "Toyota",
+      "vehicleTypes": ["car", "pickup"]
+    },
+    {
+      "id": "nissan",
+      "name": "Nissan",
+      "vehicleTypes": ["car", "pickup"]
+    },
+    {
+      "id": "honda",
+      "name": "Honda",
+      "vehicleTypes": ["car", "motorcycle"]
+    },
+    {
+      "id": "volkswagen",
+      "name": "Volkswagen",
+      "aliases": ["VW"],
+      "vehicleTypes": ["car", "van"]
+    },
+    {
+      "id": "mazda",
+      "name": "Mazda",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "ford",
+      "name": "Ford",
+      "vehicleTypes": ["car", "pickup"]
+    },
+    {
+      "id": "chevrolet",
+      "name": "Chevrolet",
+      "aliases": ["Chevy"],
+      "vehicleTypes": ["car", "pickup", "truck"]
+    },
+    {
+      "id": "kia",
+      "name": "Kia",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "hyundai",
+      "name": "Hyundai",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "suzuki",
+      "name": "Suzuki",
+      "vehicleTypes": ["car", "motorcycle"]
+    },
+    {
+      "id": "tesla",
+      "name": "Tesla",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "yamaha",
+      "name": "Yamaha",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "italika",
+      "name": "Italika",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "bajaj",
+      "name": "Bajaj",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "kawasaki",
+      "name": "Kawasaki",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "bmw",
+      "name": "BMW",
+      "vehicleTypes": ["car", "motorcycle"]
+    }
+  ]
+}

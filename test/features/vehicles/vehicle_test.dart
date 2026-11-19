@@ -31,7 +31,6 @@ void main() {
       );
 
       expect(restored.fuelConsumptionKmPerLiter, 14.5);
-
       expect(restored.electricConsumptionKwhPer100Km, isNull);
     });
 
@@ -62,9 +61,7 @@ void main() {
       );
 
       expect(restored.isHybrid, isTrue);
-
       expect(restored.fuelConsumptionKmPerLiter, 20.0);
-
       expect(restored.electricConsumptionKwhPer100Km, 15.5);
     });
 
@@ -95,9 +92,7 @@ void main() {
       );
 
       expect(restored.isElectric, isTrue);
-
       expect(restored.electricConsumptionKwhPer100Km, 16.8);
-
       expect(restored.fuelConsumptionKmPerLiter, isNull);
     });
 
@@ -120,9 +115,7 @@ void main() {
       final restored = Vehicle.fromMap('old-vehicle', oldData);
 
       expect(restored.fuelConsumptionKmPerLiter, 13.5);
-
       expect(restored.plateEnding, '5');
-
       expect(restored.plateLastNumericDigit, 5);
     });
 
@@ -144,7 +137,6 @@ void main() {
       final restored = Vehicle.fromMap('old-electric', oldData);
 
       expect(restored.electricConsumptionKwhPer100Km, 17.2);
-
       expect(restored.fuelConsumptionKmPerLiter, isNull);
     });
 
@@ -173,13 +165,78 @@ void main() {
 
         final data = vehicle.toMap();
 
-        expect(data['schemaVersion'], 2);
-
+        expect(data['schemaVersion'], 3);
         expect(data.containsKey('averageConsumption'), isFalse);
-
         expect(data.containsKey('consumptionUnit'), isFalse);
-
         expect(data.containsKey('plateLastDigit'), isFalse);
+      },
+    );
+  });
+
+  group('Vehicle model - Catálogos', () {
+    test('Guarda y recupera los identificadores de catálogo', () {
+      final vehicle = Vehicle(
+        id: 'vehicle-catalog-1',
+        brand: 'Toyota',
+        model: 'Corolla',
+        year: 2022,
+        brandId: 'toyota',
+        modelId: 'toyota-corolla',
+        vehicleType: 'car',
+        fuelType: 'gasoline',
+        fuelConsumptionKmPerLiter: 14.5,
+        electricConsumptionKwhPer100Km: null,
+        registrationCountry: 'México',
+        registrationRegion: 'Guanajuato',
+        registrationCountryCode: 'MX',
+        registrationRegionCode: 'MX-GUA',
+        plateEnding: null,
+        insuranceCompany: null,
+        insuranceValidUntil: null,
+        verificationHologram: null,
+        verificationValidUntil: null,
+        createdAt: 1770000000000,
+        updatedAt: 1770000000000,
+      );
+
+      final data = vehicle.toMap();
+      final restored = Vehicle.fromMap(
+        vehicle.id,
+        Map<Object?, Object?>.from(data),
+      );
+
+      expect(data['schemaVersion'], 3);
+      expect(restored.brandId, 'toyota');
+      expect(restored.modelId, 'toyota-corolla');
+      expect(restored.registrationCountryCode, 'MX');
+      expect(restored.registrationRegionCode, 'MX-GUA');
+    });
+
+    test(
+      'Los registros anteriores no requieren identificadores de catálogo',
+      () {
+        final oldData = <Object?, Object?>{
+          'brand': 'Toyota',
+          'model': 'Corolla',
+          'year': 2022,
+          'vehicleType': 'car',
+          'fuelType': 'gasoline',
+          'registrationCountry': 'México',
+          'registrationRegion': 'Guanajuato',
+          'createdAt': 1770000000000,
+          'updatedAt': 1770000000000,
+        };
+
+        final restored = Vehicle.fromMap('legacy-vehicle', oldData);
+
+        expect(restored.brand, 'Toyota');
+        expect(restored.model, 'Corolla');
+        expect(restored.registrationCountry, 'México');
+        expect(restored.registrationRegion, 'Guanajuato');
+        expect(restored.brandId, isNull);
+        expect(restored.modelId, isNull);
+        expect(restored.registrationCountryCode, isNull);
+        expect(restored.registrationRegionCode, isNull);
       },
     );
   });

@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "countries",
+  "catalogRevision": 1,
+  "description": "Lista semilla de países para Rumbo. Cobertura inicial, no exhaustiva.",
+  "items": [
+    {
+      "code": "MX",
+      "alpha3": "MEX",
+      "name": "México"
+    },
+    {
+      "code": "US",
+      "alpha3": "USA",
+      "name": "Estados Unidos",
+      "aliases": ["EE. UU.", "USA"]
+    },
+    {
+      "code": "CA",
+      "alpha3": "CAN",
+      "name": "Canadá"
+    },
+    {
+      "code": "GT",
+      "alpha3": "GTM",
+      "name": "Guatemala"
+    },
+    {
+      "code": "BZ",
+      "alpha3": "BLZ",
+      "name": "Belice"
+    },
+    {
+      "code": "SV",
+      "alpha3": "SLV",
+      "name": "El Salvador"
+    },
+    {
+      "code": "HN",
+      "alpha3": "HND",
+      "name": "Honduras"
+    },
+    {
+      "code": "NI",
+      "alpha3": "NIC",
+      "name": "Nicaragua"
+    },
+    {
+      "code": "CR",
+      "alpha3": "CRI",
+      "name": "Costa Rica"
+    },
+    {
+      "code": "PA",
+      "alpha3": "PAN",
+      "name": "Panamá"
+    },
+    {
+      "code": "CO",
+      "alpha3": "COL",
+      "name": "Colombia"
+    },
+    {
+      "code": "PE",
+      "alpha3": "PER",
+      "name": "Perú"
+    },
+    {
+      "code": "CL",
+      "alpha3": "CHL",
+      "name": "Chile"
+    },
+    {
+      "code": "AR",
+      "alpha3": "ARG",
+      "name": "Argentina"
+    },
+    {
+      "code": "BR",
+      "alpha3": "BRA",
+      "name": "Brasil"
+    },
+    {
+      "code": "ES",
+      "alpha3": "ESP",
+      "name": "España"
+    },
+    {
+      "code": "FR",
+      "alpha3": "FRA",
+      "name": "Francia"
+    },
+    {
+      "code": "DE",
+      "alpha3": "DEU",
+      "name": "Alemania"
+    },
+    {
+      "code": "GB",
+      "alpha3": "GBR",
+      "name": "Reino Unido"
+    },
+    {
+      "code": "IT",
+      "alpha3": "ITA",
+      "name": "Italia"
+    },
+    {
+      "code": "PT",
+      "alpha3": "PRT",
+      "name": "Portugal"
+    },
+    {
+      "code": "JP",
+      "alpha3": "JPN",
+      "name": "Japón"
+    },
+    {
+      "code": "KR",
+      "alpha3": "KOR",
+      "name": "Corea del Sur"
+    },
+    {
+      "code": "CN",
+      "alpha3": "CHN",
+      "name": "China"
+    },
+    {
+      "code": "AU",
+      "alpha3": "AUS",
+      "name": "Australia"
+    },
+    {
+      "code": "NZ",
+      "alpha3": "NZL",
+      "name": "Nueva Zelanda"
+    }
+  ]
+}

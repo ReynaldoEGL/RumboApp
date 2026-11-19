@@ -9,8 +9,8 @@ import 'package:rumboapp/features/vehicles/domain/vehicle.dart';
 class VehicleFormScreen extends ConsumerStatefulWidget {
   const VehicleFormScreen({super.key, this.vehicle});
 
-  /// Si es null, se registra un vehículo nuevo.
-  /// Si contiene un vehículo, se abre el formulario en modo edición.
+  /// Null significa que se registrará un vehículo nuevo.
+  /// Un objeto Vehicle indica que se abrirá el formulario para editarlo.
   final Vehicle? vehicle;
 
   @override
@@ -22,8 +22,8 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
 
   /// Identifica esta instancia del formulario.
   ///
-  /// Se conserva durante toda la vida de la pantalla para que Riverpod
-  /// no confunda las selecciones de formularios diferentes.
+  /// No debe generarse dentro de build(), porque necesitamos conservar
+  /// la misma identidad durante todas las reconstrucciones del widget.
   final Object _formSessionKey = Object();
 
   // ---------------------------------------------------------------------------
@@ -47,15 +47,16 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
   late final TextEditingController _verificationHologramController;
   late final TextEditingController _verificationDateController;
 
+  // Las fechas se mantienen como DateTime para el modelo Vehicle.
   DateTime? _insuranceValidUntil;
   DateTime? _verificationValidUntil;
-  bool _isSaving = false;
 
   bool get _isEditing => widget.vehicle != null;
 
-  /// Argumentos utilizados por la familia del provider.
+  /// Argumentos de la familia del provider.
   ///
-  /// Los valores iniciales provienen del vehículo cuando se está editando.
+  /// En edición, los valores iniciales se recuperan del vehículo existente.
+  /// En registro, ambas selecciones comienzan vacías.
   VehicleFormSelectionArgs get _selectionArgs {
     return (
       vehicleType: widget.vehicle?.vehicleType,
@@ -70,8 +71,8 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
 
     final vehicle = widget.vehicle;
 
-    // Los controladores de texto se inicializan aquí.
-    // No modificamos ningún provider durante initState.
+    // Los controladores de texto se inicializan en initState.
+    // No se modifica ningún provider durante este ciclo de vida.
 
     _brandController = TextEditingController(text: vehicle?.brand ?? '');
 
@@ -124,6 +125,7 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
 
   @override
   void dispose() {
+    // Liberamos todos los controladores para evitar fugas de memoria.
     _brandController.dispose();
     _modelController.dispose();
     _yearController.dispose();
@@ -145,7 +147,7 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // FORMATO DE DATOS
+  // FORMATO Y CONVERSIÓN DE DATOS
   // ---------------------------------------------------------------------------
 
   String _formatDate(DateTime? date) {
@@ -159,12 +161,16 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
     return '$day/$month/${date.year}';
   }
 
+  /// Devuelve null cuando el campo opcional está vacío.
   String? _readOptionalText(TextEditingController controller) {
     final value = controller.text.trim();
 
     return value.isEmpty ? null : value;
   }
 
+  /// Convierte un consumo a double.
+  ///
+  /// Admite coma o punto decimal, pero no valores cero o negativos.
   double? _readPositiveNumber(TextEditingController controller) {
     final value = controller.text.trim().replaceAll(',', '.');
 
@@ -204,6 +210,8 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
       return 'Ingresa un año válido.';
     }
 
+    // 1886 corresponde al primer automóvil de patente reconocido.
+    // Permitimos también el siguiente año natural para vehículos nuevos.
     if (year < 1886 || year > DateTime.now().year + 1) {
       return 'El año está fuera del rango permitido.';
     }
@@ -213,6 +221,7 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
 
   String? _validatePlateEnding(String? value) {
     if (value == null || value.trim().isEmpty) {
+      // La terminación puede omitirse.
       return null;
     }
 
@@ -249,7 +258,7 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // CLASIFICACIÓN DEL COMBUSTIBLE
+  // CLASIFICACIÓN DEL TIPO DE ENERGÍA
   // ---------------------------------------------------------------------------
 
   String _normalizeFuelType(String? value) {
@@ -285,6 +294,8 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
   }
 
   bool _isElectricConsumptionRequired(String? value) {
+    // El consumo eléctrico es obligatorio para un eléctrico puro.
+    // En un híbrido permanece opcional.
     return _isElectric(value);
   }
 
@@ -299,8 +310,8 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
   }) {
     final items = <DropdownMenuItem<String>>[];
 
-    // Si un registro anterior contiene un valor que ya no está en el
-    // catálogo actual, se conserva como opción para no perderlo al editar.
+    // Conservamos valores que pudieran existir en registros anteriores,
+    // aunque ya no estén incluidos en las opciones actuales.
     if (currentValue != null &&
         currentValue.isNotEmpty &&
         !values.contains(currentValue)) {
@@ -435,7 +446,7 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // DESPLEGABLE DE COMBUSTIBLE
+  // DESPLEGABLE DE COMBUSTIBLE O ENERGÍA
   // ---------------------------------------------------------------------------
 
   Widget _fuelTypeDropdown(
@@ -490,6 +501,20 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
     );
   }
 
+  /// Muestra los campos adecuados para el combustible seleccionado.
+  ///
+  /// Gasolina y diésel:
+  ///   - Consumo en km/L.
+  ///
+  /// Eléctrico:
+  ///   - Consumo en kWh/100 km.
+  ///
+  /// Híbrido:
+  ///   - Consumo en km/L obligatorio.
+  ///   - Consumo eléctrico opcional.
+  ///
+  /// Otro:
+  ///   - Sin estimación automática por ahora.
   Widget _consumptionFields(String? fuelType) {
     final showFuel = _requiresFuelConsumption(fuelType);
     final showElectric = _requiresElectricConsumption(fuelType);
@@ -605,21 +630,25 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // GUARDAR VEHÍCULO
+  // GUARDADO DEL VEHÍCULO
   // ---------------------------------------------------------------------------
 
   Future<void> _saveVehicle() async {
     FocusScope.of(context).unfocus();
 
-    // Evita envíos duplicados.
+    // Obtenemos el provider correspondiente a esta instancia del formulario.
     final selectionProvider = vehicleFormSelectionsProvider(_selectionArgs);
+
+    final selectionController = ref.read(selectionProvider.notifier);
 
     final currentSelections = ref.read(selectionProvider);
 
-    if (_isSaving) {
+    // Evitamos operaciones de guardado duplicadas.
+    if (currentSelections.isSaving) {
       return;
     }
 
+    // Validamos todos los campos antes de iniciar la operación.
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -642,9 +671,10 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
       return;
     }
 
-    // Solo se guardan los consumos correspondientes al combustible
-    // seleccionado. Los campos ocultos no conservan valores anteriores
-    // que ya no correspondan a la nueva selección.
+    // Solo persistimos los consumos que correspondan al tipo de energía.
+    //
+    // Si el usuario cambia de gasolina a eléctrico, por ejemplo,
+    // el consumo anterior en km/L no se guardará para ese vehículo.
     final fuelConsumption = _requiresFuelConsumption(fuelType)
         ? _readPositiveNumber(_fuelConsumptionController)
         : null;
@@ -675,6 +705,10 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
     final existingVehicle = widget.vehicle;
     final now = DateTime.now().millisecondsSinceEpoch;
 
+    // Construimos el modelo con el esquema actual de Vehicle.
+    //
+    // En edición conservamos el identificador y createdAt.
+    // En registro dejamos que el repositorio genere el identificador.
     final vehicle = Vehicle(
       id: existingVehicle?.id ?? '',
       brand: _brandController.text.trim(),
@@ -695,21 +729,28 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
       updatedAt: now,
     );
 
-    setState(() => _isSaving = true);
+    // El indicador de guardado se administra exclusivamente en Riverpod.
+    // Esto reconstruye el botón sin llamar a setState().
+    selectionController.setSaving(true);
 
     try {
-      final controller = ref.read(vehicleControllerProvider.notifier);
+      final vehicleController = ref.read(vehicleControllerProvider.notifier);
+
       if (_isEditing) {
-        await controller.updateVehicle(vehicle);
+        // Actualización: requiere el ID existente.
+        await vehicleController.updateVehicle(vehicle);
       } else {
-        await controller.addVehicle(vehicle);
+        // Registro: el repositorio genera el ID con push().
+        await vehicleController.addVehicle(vehicle);
       }
 
+      // Si el usuario abandonó la pantalla durante la petición,
+      // no intentamos actualizar su estado ni mostrar mensajes.
       if (!mounted) {
         return;
       }
 
-      setState(() => _isSaving = false);
+      selectionController.setSaving(false);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -727,7 +768,8 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
         return;
       }
 
-      setState(() => _isSaving = false);
+      // Restauramos el indicador para permitir reintentar.
+      selectionController.setSaving(false);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('No fue posible guardar el vehículo: $error')),
@@ -741,6 +783,7 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Esta pantalla observa únicamente el estado de su propia instancia.
     final selectionProvider = vehicleFormSelectionsProvider(_selectionArgs);
 
     final selections = ref.watch(selectionProvider);
@@ -900,7 +943,7 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
               ),
 
               // ---------------------------------------------------------------
-              // VERIFICACIÓN
+              // VERIFICACIÓN Y HOLOGRAMA
               // ---------------------------------------------------------------
               const SizedBox(height: 28),
 
@@ -952,8 +995,9 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
               const SizedBox(height: 28),
 
               FilledButton.icon(
-                onPressed: _isSaving ? null : _saveVehicle,
-                icon: _isSaving
+                // El botón depende del estado administrado por Riverpod.
+                onPressed: selections.isSaving ? null : _saveVehicle,
+                icon: selections.isSaving
                     ? const SizedBox(
                         height: 18,
                         width: 18,
@@ -961,7 +1005,7 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
                       )
                     : const Icon(Icons.save_outlined),
                 label: Text(
-                  _isSaving
+                  selections.isSaving
                       ? 'Guardando...'
                       : _isEditing
                       ? 'Actualizar vehículo'

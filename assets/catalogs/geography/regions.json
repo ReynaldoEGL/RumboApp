@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "regions",
+  "catalogRevision": 1,
+  "description": "Entidades federativas de México con códigos ISO 3166-2.",
+  "items": [
+    {
+      "code": "MX-AGU",
+      "countryCode": "MX",
+      "name": "Aguascalientes"
+    },
+    {
+      "code": "MX-BCN",
+      "countryCode": "MX",
+      "name": "Baja California"
+    },
+    {
+      "code": "MX-BCS",
+      "countryCode": "MX",
+      "name": "Baja California Sur"
+    },
+    {
+      "code": "MX-CAM",
+      "countryCode": "MX",
+      "name": "Campeche"
+    },
+    {
+      "code": "MX-CHP",
+      "countryCode": "MX",
+      "name": "Chiapas"
+    },
+    {
+      "code": "MX-CHH",
+      "countryCode": "MX",
+      "name": "Chihuahua"
+    },
+    {
+      "code": "MX-CMX",
+      "countryCode": "MX",
+      "name": "Ciudad de México",
+      "aliases": ["CDMX"]
+    },
+    {
+      "code": "MX-COA",
+      "countryCode": "MX",
+      "name": "Coahuila de Zaragoza",
+      "aliases": ["Coahuila"]
+    },
+    {
+      "code": "MX-COL",
+      "countryCode": "MX",
+      "name": "Colima"
+    },
+    {
+      "code": "MX-DUR",
+      "countryCode": "MX",
+      "name": "Durango"
+    },
+    {
+      "code": "MX-GRO",
+      "countryCode": "MX",
+      "name": "Guerrero"
+    },
+    {
+      "code": "MX-GUA",
+      "countryCode": "MX",
+      "name": "Guanajuato"
+    },
+    {
+      "code": "MX-HID",
+      "countryCode": "MX",
+      "name": "Hidalgo"
+    },
+    {
+      "code": "MX-JAL",
+      "countryCode": "MX",
+      "name": "Jalisco"
+    },
+    {
+      "code": "MX-MEX",
+      "countryCode": "MX",
+      "name": "Estado de México",
+      "aliases": ["México", "Edomex"]
+    },
+    {
+      "code": "MX-MIC",
+      "countryCode": "MX",
+      "name": "Michoacán de Ocampo",
+      "aliases": ["Michoacán"]
+    },
+    {
+      "code": "MX-MOR",
+      "countryCode": "MX",
+      "name": "Morelos"
+    },
+    {
+      "code": "MX-NAY",
+      "countryCode": "MX",
+      "name": "Nayarit"
+    },
+    {
+      "code": "MX-NLE",
+      "countryCode": "MX",
+      "name": "Nuevo León"
+    },
+    {
+      "code": "MX-OAX",
+      "countryCode": "MX",
+      "name": "Oaxaca"
+    },
+    {
+      "code": "MX-PUE",
+      "countryCode": "MX",
+      "name": "Puebla"
+    },
+    {
+      "code": "MX-QUE",
+      "countryCode": "MX",
+      "name": "Querétaro"
+    },
+    {
+      "code": "MX-ROO",
+      "countryCode": "MX",
+      "name": "Quintana Roo"
+    },
+    {
+      "code": "MX-SLP",
+      "countryCode": "MX",
+      "name": "San Luis Potosí"
+    },
+    {
+      "code": "MX-SIN",
+      "countryCode": "MX",
+      "name": "Sinaloa"
+    },
+    {
+      "code": "MX-SON",
+      "countryCode": "MX",
+      "name": "Sonora"
+    },
+    {
+      "code": "MX-TAB",
+      "countryCode": "MX",
+      "name": "Tabasco"
+    },
+    {
+      "code": "MX-TAM",
+      "countryCode": "MX",
+      "name": "Tamaulipas"
+    },
+    {
+      "code": "MX-TLA",
+      "countryCode": "MX",
+      "name": "Tlaxcala"
+    },
+    {
+      "code": "MX-VER",
+      "countryCode": "MX",
+      "name": "Veracruz de Ignacio de la Llave",
+      "aliases": ["Veracruz"]
+    },
+    {
+      "code": "MX-YUC",
+      "countryCode": "MX",
+      "name": "Yucatán"
+    },
+    {
+      "code": "MX-ZAC",
+      "countryCode": "MX",
+      "name": "Zacatecas"
+    }
+  ]
+}

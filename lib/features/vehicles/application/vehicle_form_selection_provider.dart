@@ -1,17 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Argumentos iniciales de cada formulario.
-///
-/// sessionKey identifica una instancia específica del formulario.
-/// Esto permite mantener independientes las selecciones de diferentes
-/// vehículos y formularios.
+/// Identifica los valores iniciales de cada formulario.
 typedef VehicleFormSelectionArgs = ({
   String? vehicleType,
   String? fuelType,
   Object sessionKey,
 });
 
-/// Estado de las selecciones del formulario.
+/// Estado de las selecciones y del envío del formulario.
 class VehicleFormSelections {
   const VehicleFormSelections({
     this.vehicleType,
@@ -23,7 +19,6 @@ class VehicleFormSelections {
   final String? fuelType;
   final bool isSaving;
 
-  /// Crea una nueva instancia conservando los valores no modificados.
   VehicleFormSelections copyWith({
     String? vehicleType,
     String? fuelType,
@@ -37,13 +32,7 @@ class VehicleFormSelections {
   }
 }
 
-/// Provider independiente para cada instancia del formulario.
-///
-/// Configuración para Riverpod 3:
-/// - Notifier unificado.
-/// - autoDispose para liberar el estado al abandonar el formulario.
-/// - family para recibir las selecciones iniciales.
-/// - El argumento se recibe en el constructor del Notifier.
+/// Provider autoDispose independiente por formulario.
 final vehicleFormSelectionsProvider = NotifierProvider.autoDispose
     .family<
       VehicleFormSelectionsController,
@@ -58,18 +47,12 @@ class VehicleFormSelectionsController extends Notifier<VehicleFormSelections> {
 
   @override
   VehicleFormSelections build() {
-    // El estado inicial se construye directamente.
-    //
-    // No utilizar initialize() desde initState ni modificar
-    // el provider durante la construcción de los widgets.
     return VehicleFormSelections(
       vehicleType: initialSelections.vehicleType,
       fuelType: initialSelections.fuelType,
-      isSaving: false,
     );
   }
 
-  /// Actualiza el tipo de vehículo.
   void setVehicleType(String? value) {
     if (value == null || value == state.vehicleType) {
       return;
@@ -78,7 +61,6 @@ class VehicleFormSelectionsController extends Notifier<VehicleFormSelections> {
     state = state.copyWith(vehicleType: value);
   }
 
-  /// Actualiza el tipo de combustible o energía.
   void setFuelType(String? value) {
     if (value == null || value == state.fuelType) {
       return;
@@ -87,7 +69,7 @@ class VehicleFormSelectionsController extends Notifier<VehicleFormSelections> {
     state = state.copyWith(fuelType: value);
   }
 
-  /// Actualiza el indicador de guardado.
+  /// Controla el estado de guardado del formulario.
   void setSaving(bool value) {
     if (value == state.isSaving) {
       return;

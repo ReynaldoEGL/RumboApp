@@ -1,0 +1,455 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "vehicle_models",
+  "catalogRevision": 1,
+  "description": "Modelos de ejemplo asociados a sus marcas. La cobertura no es exhaustiva.",
+  "items": [
+    {
+      "id": "toyota-corolla",
+      "brandId": "toyota",
+      "name": "Corolla",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "toyota-camry",
+      "brandId": "toyota",
+      "name": "Camry",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "toyota-yaris",
+      "brandId": "toyota",
+      "name": "Yaris",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "toyota-prius",
+      "brandId": "toyota",
+      "name": "Prius",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "toyota-rav4",
+      "brandId": "toyota",
+      "name": "RAV4",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "toyota-hilux",
+      "brandId": "toyota",
+      "name": "Hilux",
+      "vehicleTypes": ["pickup"]
+    },
+    {
+      "id": "toyota-tacoma",
+      "brandId": "toyota",
+      "name": "Tacoma",
+      "vehicleTypes": ["pickup"]
+    },
+
+    {
+      "id": "nissan-versa",
+      "brandId": "nissan",
+      "name": "Versa",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "nissan-sentra",
+      "brandId": "nissan",
+      "name": "Sentra",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "nissan-march",
+      "brandId": "nissan",
+      "name": "March",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "nissan-kicks",
+      "brandId": "nissan",
+      "name": "Kicks",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "nissan-x-trail",
+      "brandId": "nissan",
+      "name": "X-Trail",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "nissan-frontier",
+      "brandId": "nissan",
+      "name": "Frontier",
+      "vehicleTypes": ["pickup"]
+    },
+
+    {
+      "id": "honda-civic",
+      "brandId": "honda",
+      "name": "Civic",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "honda-city",
+      "brandId": "honda",
+      "name": "City",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "honda-cr-v",
+      "brandId": "honda",
+      "name": "CR-V",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "honda-hr-v",
+      "brandId": "honda",
+      "name": "HR-V",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "honda-cb190r",
+      "brandId": "honda",
+      "name": "CB190R",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "honda-cbr650r",
+      "brandId": "honda",
+      "name": "CBR650R",
+      "vehicleTypes": ["motorcycle"]
+    },
+
+    {
+      "id": "volkswagen-jetta",
+      "brandId": "volkswagen",
+      "name": "Jetta",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "volkswagen-polo",
+      "brandId": "volkswagen",
+      "name": "Polo",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "volkswagen-taos",
+      "brandId": "volkswagen",
+      "name": "Taos",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "volkswagen-tiguan",
+      "brandId": "volkswagen",
+      "name": "Tiguan",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "volkswagen-transporter",
+      "brandId": "volkswagen",
+      "name": "Transporter",
+      "vehicleTypes": ["van"]
+    },
+
+    {
+      "id": "mazda-2",
+      "brandId": "mazda",
+      "name": "Mazda2",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "mazda-3",
+      "brandId": "mazda",
+      "name": "Mazda3",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "mazda-cx-30",
+      "brandId": "mazda",
+      "name": "CX-30",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "mazda-cx-5",
+      "brandId": "mazda",
+      "name": "CX-5",
+      "vehicleTypes": ["car"]
+    },
+
+    {
+      "id": "ford-mustang",
+      "brandId": "ford",
+      "name": "Mustang",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "ford-escape",
+      "brandId": "ford",
+      "name": "Escape",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "ford-f-150",
+      "brandId": "ford",
+      "name": "F-150",
+      "vehicleTypes": ["pickup"]
+    },
+    {
+      "id": "ford-ranger",
+      "brandId": "ford",
+      "name": "Ranger",
+      "vehicleTypes": ["pickup"]
+    },
+    {
+      "id": "ford-maverick",
+      "brandId": "ford",
+      "name": "Maverick",
+      "vehicleTypes": ["pickup"]
+    },
+
+    {
+      "id": "chevrolet-aveo",
+      "brandId": "chevrolet",
+      "name": "Aveo",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "chevrolet-onix",
+      "brandId": "chevrolet",
+      "name": "Onix",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "chevrolet-tracker",
+      "brandId": "chevrolet",
+      "name": "Tracker",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "chevrolet-silverado",
+      "brandId": "chevrolet",
+      "name": "Silverado",
+      "vehicleTypes": ["pickup"]
+    },
+    {
+      "id": "chevrolet-colorado",
+      "brandId": "chevrolet",
+      "name": "Colorado",
+      "vehicleTypes": ["pickup"]
+    },
+
+    {
+      "id": "kia-k3",
+      "brandId": "kia",
+      "name": "K3",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "kia-seltos",
+      "brandId": "kia",
+      "name": "Seltos",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "kia-sportage",
+      "brandId": "kia",
+      "name": "Sportage",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "kia-sorento",
+      "brandId": "kia",
+      "name": "Sorento",
+      "vehicleTypes": ["car"]
+    },
+
+    {
+      "id": "hyundai-grand-i10",
+      "brandId": "hyundai",
+      "name": "Grand i10",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "hyundai-accent",
+      "brandId": "hyundai",
+      "name": "Accent",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "hyundai-creta",
+      "brandId": "hyundai",
+      "name": "Creta",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "hyundai-tucson",
+      "brandId": "hyundai",
+      "name": "Tucson",
+      "vehicleTypes": ["car"]
+    },
+
+    {
+      "id": "suzuki-swift",
+      "brandId": "suzuki",
+      "name": "Swift",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "suzuki-vitara",
+      "brandId": "suzuki",
+      "name": "Vitara",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "suzuki-jimny",
+      "brandId": "suzuki",
+      "name": "Jimny",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "suzuki-gsx-s150",
+      "brandId": "suzuki",
+      "name": "GSX-S150",
+      "vehicleTypes": ["motorcycle"]
+    },
+
+    {
+      "id": "tesla-model-3",
+      "brandId": "tesla",
+      "name": "Model 3",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "tesla-model-y",
+      "brandId": "tesla",
+      "name": "Model Y",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "tesla-model-s",
+      "brandId": "tesla",
+      "name": "Model S",
+      "vehicleTypes": ["car"]
+    },
+
+    {
+      "id": "yamaha-fz-s",
+      "brandId": "yamaha",
+      "name": "FZ-S",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "yamaha-mt-03",
+      "brandId": "yamaha",
+      "name": "MT-03",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "yamaha-mt-07",
+      "brandId": "yamaha",
+      "name": "MT-07",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "yamaha-yzf-r15",
+      "brandId": "yamaha",
+      "name": "YZF-R15",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "yamaha-nmax",
+      "brandId": "yamaha",
+      "name": "NMAX",
+      "vehicleTypes": ["motorcycle"]
+    },
+
+    {
+      "id": "italika-ft150",
+      "brandId": "italika",
+      "name": "FT150",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "italika-dm200",
+      "brandId": "italika",
+      "name": "DM200",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "italika-ws150",
+      "brandId": "italika",
+      "name": "WS150",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "italika-vort-x-300",
+      "brandId": "italika",
+      "name": "Vort-X 300",
+      "vehicleTypes": ["motorcycle"]
+    },
+
+    {
+      "id": "bajaj-boxer-150",
+      "brandId": "bajaj",
+      "name": "Boxer 150",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "bajaj-pulsar-n160",
+      "brandId": "bajaj",
+      "name": "Pulsar N160",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "bajaj-dominar-400",
+      "brandId": "bajaj",
+      "name": "Dominar 400",
+      "vehicleTypes": ["motorcycle"]
+    },
+
+    {
+      "id": "kawasaki-ninja-400",
+      "brandId": "kawasaki",
+      "name": "Ninja 400",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "kawasaki-z400",
+      "brandId": "kawasaki",
+      "name": "Z400",
+      "vehicleTypes": ["motorcycle"]
+    },
+    {
+      "id": "kawasaki-versys-650",
+      "brandId": "kawasaki",
+      "name": "Versys 650",
+      "vehicleTypes": ["motorcycle"]
+    },
+
+    {
+      "id": "bmw-series-3",
+      "brandId": "bmw",
+      "name": "Serie 3",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "bmw-x1",
+      "brandId": "bmw",
+      "name": "X1",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "bmw-x3",
+      "brandId": "bmw",
+      "name": "X3",
+      "vehicleTypes": ["car"]
+    },
+    {
+      "id": "bmw-r-1250-gs",
+      "brandId": "bmw",
+      "name": "R 1250 GS",
+      "vehicleTypes": ["motorcycle"]
+    }
+  ]
+}
