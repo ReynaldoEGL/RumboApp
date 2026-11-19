@@ -55,6 +55,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '508166257411',
     projectId: 'rumbo-929cd',
     authDomain: 'rumbo-929cd.firebaseapp.com',
+    databaseURL: 'https://rumbo-929cd-default-rtdb.firebaseio.com',
     storageBucket: 'rumbo-929cd.firebasestorage.app',
   );
 
@@ -63,6 +64,7 @@ class DefaultFirebaseOptions {
     appId: '1:508166257411:android:220a9c7d33dd1c05950736',
     messagingSenderId: '508166257411',
     projectId: 'rumbo-929cd',
+    databaseURL: 'https://rumbo-929cd-default-rtdb.firebaseio.com',
     storageBucket: 'rumbo-929cd.firebasestorage.app',
   );
 }

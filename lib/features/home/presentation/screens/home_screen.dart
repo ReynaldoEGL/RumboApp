@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:rumboapp/app/app_routes.dart';
+
 import 'package:rumboapp/core/providers/theme_mode_provider.dart';
 
 import 'package:rumboapp/features/auth/application/auth_providers.dart';
@@ -32,6 +33,7 @@ class HomeScreen extends ConsumerWidget {
             ),
           ],
         ),
+
         actions: [
           IconButton(
             tooltip: themeMode == ThemeMode.dark
@@ -40,7 +42,7 @@ class HomeScreen extends ConsumerWidget {
             onPressed: () async {
               try {
                 await ref.read(themeModeProvider.notifier).toggle();
-              } catch (error) {
+              } catch (_) {
                 if (!context.mounted) {
                   return;
                 }
@@ -86,16 +88,15 @@ class HomeScreen extends ConsumerWidget {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final double maxContentWidth = constraints.maxWidth > 1120
-                ? 1120
+            final maxContentWidth = constraints.maxWidth > 1120
+                ? 1120.0
                 : constraints.maxWidth;
 
-            final double horizontalPadding = maxContentWidth >= 900 ? 32 : 20;
+            final horizontalPadding = maxContentWidth >= 900 ? 32.0 : 20.0;
 
-            final double availableWidth =
-                maxContentWidth - (horizontalPadding * 2);
+            final availableWidth = maxContentWidth - horizontalPadding * 2;
 
-            final double cardWidth = availableWidth >= 720
+            final cardWidth = availableWidth >= 720
                 ? (availableWidth - 32) / 3
                 : availableWidth;
 
@@ -146,8 +147,7 @@ class HomeScreen extends ConsumerWidget {
                       const SizedBox(height: 6),
 
                       Text(
-                        'Todo lo que necesitas para organizar '
-                        'tu próxima salida.',
+                        'Organiza tus recursos antes de salir.',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -185,6 +185,21 @@ class HomeScreen extends ConsumerWidget {
                               onTap: () {
                                 Navigator.of(context)
                                     .pushNamed(AppRoutes.roadRoutes);
+                              },
+                            ),
+                          ),
+
+                          SizedBox(
+                            width: cardWidth,
+                            child: _FeatureCard(
+                              icon: Icons.directions_car_outlined,
+                              title: 'Mis vehículos',
+                              description:
+                                  'Registra tus vehículos, consumo, '
+                                  'seguro y verificación.',
+                              onTap: () {
+                                Navigator.of(context)
+                                    .pushNamed(AppRoutes.vehicles);
                               },
                             ),
                           ),
@@ -231,13 +246,13 @@ class _WelcomeBanner extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final bool compact = constraints.maxWidth < 620;
+        final compact = constraints.maxWidth < 620;
 
-        final Color secondColor =
+        final secondColor =
             Color.lerp(colorScheme.primary, colorScheme.tertiary, 0.4) ??
             colorScheme.tertiary;
 
-        final Widget message = Column(
+        final message = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -262,15 +277,12 @@ class _WelcomeBanner extends StatelessWidget {
           ],
         );
 
-        final Widget illustration = Container(
-          width: compact ? 104 : 136,
-          height: compact ? 104 : 136,
+        final illustration = Container(
+          width: compact ? 104.0 : 136.0,
+          height: compact ? 104.0 : 136.0,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: colorScheme.onPrimary.withValues(alpha: 0.12),
-            border: Border.all(
-              color: colorScheme.onPrimary.withValues(alpha: 0.16),
-            ),
           ),
           child: Icon(
             Icons.travel_explore_rounded,
@@ -460,9 +472,7 @@ class _PreparationNote extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          const _ReminderLine(
-            text: 'Mantén tus documentos importantes protegidos.',
-          ),
+          const _ReminderLine(text: 'Revisa la documentación de tu vehículo.'),
         ],
       ),
     );

@@ -6,6 +6,8 @@ import 'package:rumboapp/features/auth/presentation/screens/login_screen.dart';
 import 'package:rumboapp/features/auth/presentation/screens/register_screen.dart';
 import 'package:rumboapp/features/auth/presentation/screens/forgot_password_screen.dart';
 
+import 'package:rumboapp/features/vehicles/presentation/screens/vehicles_screen.dart';
+
 import 'package:rumboapp/features/shared/presentation/screens/feature_placeholder_screen.dart';
 
 class AppRouter {
@@ -19,6 +21,9 @@ class AppRouter {
 
       case AppRoutes.forgotPassword:
         return _createRoute(settings, const ForgotPasswordScreen());
+
+      case AppRoutes.vehicles:
+        return _createRoute(settings, const VehiclesScreen());
 
       case AppRoutes.documents:
         return _createRoute(

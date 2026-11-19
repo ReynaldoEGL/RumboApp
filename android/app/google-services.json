@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "508166257411",
+    "firebase_url": "https://rumbo-929cd-default-rtdb.firebaseio.com",
     "project_id": "rumbo-929cd",
     "storage_bucket": "rumbo-929cd.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.example.rumboapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "508166257411-d8ek2c5mlmb6tjtltd93rq02rnp9crpk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rumboapp",
+            "certificate_hash": "218e6310a4536145b42b0f2ed64f7e882e69e032"
+          }
+        },
+        {
+          "client_id": "508166257411-7602bb19dvrbnfigftpn27qmroc4qh74.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDq0rpnOYVtAo-IPIUCF5n1vH3HDeEGzxM"
@@ -20,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "508166257411-7602bb19dvrbnfigftpn27qmroc4qh74.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

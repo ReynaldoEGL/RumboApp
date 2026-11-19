@@ -7,5 +7,6 @@ class AppRoutes {
 
   static const String documents = '/documents';
   static const String roadRoutes = '/road-routes';
+  static const String vehicles = '/vehicles';
   static const String trips = '/trips';
 }
