@@ -25,12 +25,10 @@ class VehiclesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authUserProvider);
 
-    final user = authState.asData?.value;
-
     return Scaffold(
       appBar: AppBar(title: const Text('Mis vehículos')),
 
-      floatingActionButton: user == null
+      floatingActionButton: authState.asData?.value == null
           ? null
           : FloatingActionButton.extended(
               onPressed: () {
@@ -200,11 +198,7 @@ class _VehicleCard extends StatelessWidget {
     };
   }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) {
-      return 'No registrado';
-    }
-
+  String _formatDate(DateTime date) {
     final day = date.day.toString().padLeft(2, '0');
     final month = date.month.toString().padLeft(2, '0');
 
@@ -213,17 +207,89 @@ class _VehicleCard extends StatelessWidget {
 
   String _expirationLabel(String name, DateTime? date) {
     if (date == null) {
-      return '$name: no registrado';
+      return '$name: sin fecha registrada';
     }
 
     final today = DateUtils.dateOnly(DateTime.now());
     final expiration = DateUtils.dateOnly(date);
 
     if (expiration.isBefore(today)) {
-      return '$name: vencimiento registrado $expiration';
+      return '$name: fecha registrada vencida '
+          '(${_formatDate(date)})';
     }
 
-    return '$name: ${_formatDate(date)}';
+    if (expiration.isAtSameMomentAs(today)) {
+      return '$name: fecha de vencimiento hoy';
+    }
+
+    return '$name: fecha registrada '
+        '${_formatDate(date)}';
+  }
+
+  List<Widget> _buildConsumptionInfo(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    Widget line({required String label, required String value}) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 7),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.speed_rounded, size: 18, color: colorScheme.primary),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Text('$label: $value', style: theme.textTheme.bodyMedium),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final fuel = vehicle.fuelConsumptionKmPerLiter;
+    final electric = vehicle.electricConsumptionKwhPer100Km;
+
+    switch (vehicle.fuelType) {
+      case 'gasoline':
+      case 'diesel':
+        return [
+          line(
+            label: 'Rendimiento promedio',
+            value: fuel == null
+                ? 'No registrado'
+                : '${fuel.toStringAsFixed(2)} km/L',
+          ),
+        ];
+
+      case 'electric':
+        return [
+          line(
+            label: 'Consumo eléctrico',
+            value: electric == null
+                ? 'No registrado'
+                : '${electric.toStringAsFixed(2)} kWh/100 km',
+          ),
+        ];
+
+      case 'hybrid':
+        return [
+          line(
+            label: 'Rendimiento de combustible',
+            value: fuel == null
+                ? 'No registrado'
+                : '${fuel.toStringAsFixed(2)} km/L',
+          ),
+          line(
+            label: 'Consumo eléctrico',
+            value: electric == null
+                ? 'No registrado'
+                : '${electric.toStringAsFixed(2)} kWh/100 km',
+          ),
+        ];
+
+      default:
+        return [line(label: 'Consumo', value: 'Sin estimación disponible')];
+    }
   }
 
   @override
@@ -231,9 +297,13 @@ class _VehicleCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final icon = vehicle.fuelType == 'electric'
+    final icon = vehicle.isElectric
         ? Icons.electric_car_outlined
         : Icons.directions_car_outlined;
+
+    final plateEnding = vehicle.plateEnding;
+
+    final lastNumericDigit = vehicle.plateLastNumericDigit;
 
     return Card(
       elevation: 0,
@@ -315,40 +385,47 @@ class _VehicleCard extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
-            if (vehicle.averageConsumption != null) ...[
-              Row(
-                children: [
-                  Icon(
-                    Icons.speed_rounded,
-                    size: 19,
-                    color: colorScheme.primary,
-                  ),
-                  const SizedBox(width: 9),
-                  Text(
-                    'Consumo: ${vehicle.averageConsumption} '
-                    '${vehicle.consumptionUnit}',
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-            ],
+            ..._buildConsumptionInfo(context),
+
+            const SizedBox(height: 14),
 
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(
                   Icons.confirmation_number_outlined,
                   size: 19,
                   color: colorScheme.secondary,
                 ),
+
                 const SizedBox(width: 9),
-                Text(
-                  vehicle.plateLastDigit == null
-                      ? 'Terminación de placa: no registrada'
-                      : 'Terminación de placa: ${vehicle.plateLastDigit}',
-                  style: theme.textTheme.bodyMedium,
+
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        plateEnding == null
+                            ? 'Terminación de placa: no registrada'
+                            : 'Terminación registrada: $plateEnding',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+
+                      if (plateEnding != null) ...[
+                        const SizedBox(height: 3),
+                        Text(
+                          lastNumericDigit == null
+                              ? 'No se detectó un dígito numérico.'
+                              : 'Último dígito numérico: $lastNumericDigit',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -366,19 +443,35 @@ class _VehicleCard extends StatelessWidget {
 
             const SizedBox(height: 6),
 
+            if (vehicle.insuranceCompany != null) ...[
+              Text(
+                'Aseguradora declarada: ${vehicle.insuranceCompany}',
+                style: theme.textTheme.bodySmall,
+              ),
+              const SizedBox(height: 6),
+            ],
+
             Text(
               _expirationLabel('Verificación', vehicle.verificationValidUntil),
               style: theme.textTheme.bodySmall,
             ),
 
-            if (vehicle.verificationHologram != null &&
-                vehicle.verificationHologram!.isNotEmpty) ...[
+            if (vehicle.verificationHologram != null) ...[
               const SizedBox(height: 6),
               Text(
-                'Holograma: ${vehicle.verificationHologram}',
+                'Holograma declarado: ${vehicle.verificationHologram}',
                 style: theme.textTheme.bodySmall,
               ),
             ],
+
+            const SizedBox(height: 8),
+
+            Text(
+              'Las vigencias son datos registrados por el usuario.',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       ),
