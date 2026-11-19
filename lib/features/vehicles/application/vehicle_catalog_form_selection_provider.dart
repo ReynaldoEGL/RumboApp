@@ -6,6 +6,7 @@ typedef VehicleCatalogFormSelectionArgs = ({
   String? modelId,
   String? countryCode,
   String? regionCode,
+  int? year,
 });
 
 class VehicleCatalogFormSelections {
@@ -14,12 +15,14 @@ class VehicleCatalogFormSelections {
     this.modelId,
     this.countryCode,
     this.regionCode,
+    this.year,
   });
 
   final String? brandId;
   final String? modelId;
   final String? countryCode;
   final String? regionCode;
+  final int? year;
 
   VehicleCatalogFormSelections copyWith({
     String? brandId,
@@ -30,12 +33,15 @@ class VehicleCatalogFormSelections {
     bool clearCountryCode = false,
     String? regionCode,
     bool clearRegionCode = false,
+    int? year,
+    bool clearYear = false,
   }) {
     return VehicleCatalogFormSelections(
       brandId: clearBrandId ? null : brandId ?? this.brandId,
       modelId: clearModelId ? null : modelId ?? this.modelId,
       countryCode: clearCountryCode ? null : countryCode ?? this.countryCode,
       regionCode: clearRegionCode ? null : regionCode ?? this.regionCode,
+      year: clearYear ? null : year ?? this.year,
     );
   }
 }
@@ -60,6 +66,7 @@ class VehicleCatalogFormSelectionController
       modelId: initialSelections.modelId,
       countryCode: initialSelections.countryCode,
       regionCode: initialSelections.regionCode,
+      year: initialSelections.year,
     );
   }
 
@@ -100,7 +107,7 @@ class VehicleCatalogFormSelectionController
   }
 
   void selectCountry(String value) {
-    final normalized = value.trim();
+    final normalized = value.trim().toUpperCase();
 
     if (normalized.isEmpty || normalized == state.countryCode) {
       return;
@@ -118,7 +125,7 @@ class VehicleCatalogFormSelectionController
   }
 
   void selectRegion(String value) {
-    final normalized = value.trim();
+    final normalized = value.trim().toUpperCase();
 
     if (normalized.isEmpty || normalized == state.regionCode) {
       return;
@@ -133,5 +140,17 @@ class VehicleCatalogFormSelectionController
     }
 
     state = state.copyWith(clearRegionCode: true);
+  }
+
+  void setYear(int? value) {
+    if (value == state.year) {
+      return;
+    }
+
+    state = state.copyWith(
+      year: value,
+      clearYear: value == null,
+      clearModelId: true,
+    );
   }
 }

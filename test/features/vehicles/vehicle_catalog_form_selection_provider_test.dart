@@ -22,6 +22,7 @@ void main() {
       expect(selections.modelId, 'toyota-corolla');
       expect(selections.countryCode, 'MX');
       expect(selections.regionCode, 'MX-GUA');
+      expect(selections.year, 2022);
     });
 
     test('cambiar la marca limpia el modelo anterior', () {
@@ -65,7 +66,7 @@ void main() {
     });
 
     test('cambiar el país limpia la región anterior', () {
-      harness.container.read(harness.provider.notifier).selectCountry('US');
+      harness.container.read(harness.provider.notifier).selectCountry('us');
 
       final selections = harness.container.read(harness.provider);
 
@@ -92,12 +93,42 @@ void main() {
     });
 
     test('seleccionar una región conserva el país', () {
-      harness.container.read(harness.provider.notifier).selectRegion('MX-QUE');
+      harness.container.read(harness.provider.notifier).selectRegion('mx-que');
 
       final selections = harness.container.read(harness.provider);
 
       expect(selections.countryCode, 'MX');
       expect(selections.regionCode, 'MX-QUE');
+    });
+
+    test('cambiar el año limpia el identificador del modelo', () {
+      harness.container.read(harness.provider.notifier).setYear(2024);
+
+      final selections = harness.container.read(harness.provider);
+
+      expect(selections.year, 2024);
+      expect(selections.modelId, isNull);
+      expect(selections.brandId, 'toyota');
+    });
+
+    test('limpiar el año elimina el filtro de producción', () {
+      harness.container.read(harness.provider.notifier).setYear(null);
+
+      final selections = harness.container.read(harness.provider);
+
+      expect(selections.year, isNull);
+      expect(selections.modelId, isNull);
+    });
+
+    test('establecer el mismo año no modifica el estado', () {
+      final before = harness.container.read(harness.provider);
+
+      harness.container.read(harness.provider.notifier).setYear(2022);
+
+      final after = harness.container.read(harness.provider);
+
+      expect(after.year, before.year);
+      expect(after.modelId, before.modelId);
     });
 
     test('los formularios mantienen selecciones independientes', () {
@@ -107,6 +138,7 @@ void main() {
         modelId: 'honda-civic',
         countryCode: 'US',
         regionCode: null,
+        year: 2023,
       );
 
       final secondProvider = vehicleCatalogFormSelectionsProvider(secondArgs);
@@ -124,6 +156,7 @@ void main() {
       expect(secondSelections.brandId, 'honda');
       expect(secondSelections.modelId, 'honda-civic');
       expect(secondSelections.countryCode, 'US');
+      expect(secondSelections.year, 2023);
     });
   });
 }
@@ -141,6 +174,7 @@ class _Harness {
     modelId: 'toyota-corolla',
     countryCode: 'MX',
     regionCode: 'MX-GUA',
+    year: 2022,
   );
 
   late final provider = vehicleCatalogFormSelectionsProvider(args);
