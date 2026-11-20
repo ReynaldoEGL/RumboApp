@@ -426,7 +426,7 @@ class _RoadRoutesScreenState extends ConsumerState<RoadRoutesScreen> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 SizedBox(
-                  width: 210,
+                  width: 240,
                   child: DropdownButtonFormField<String>(
                     key: ValueKey(state.currencyCode),
                     initialValue: state.currencyCode,

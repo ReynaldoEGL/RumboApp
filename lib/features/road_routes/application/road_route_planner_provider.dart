@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:rumboapp/features/road_routes/application/here_routing_service_provider.dart';
+import 'package:rumboapp/features/road_routes/data/here_routing_service.dart';
 import 'package:rumboapp/features/road_routes/domain/road_route.dart';
 import 'package:rumboapp/features/road_routes/domain/route_location.dart';
 
@@ -246,9 +248,13 @@ class RoadRoutePlannerController extends Notifier<RoadRoutePlannerState> {
     );
 
     try {
+      final searchCenter =
+          state.destination?.coordinate ??
+          HereRoutingService.defaultSearchCenter;
+
       final locations = await ref
           .read(hereRoutingServiceProvider)
-          .searchLocations(query: query, at: state.destination?.coordinate);
+          .searchLocations(query: query, at: searchCenter);
 
       if (_disposed || requestVersion != _originSearchVersion) {
         return;
@@ -257,9 +263,19 @@ class RoadRoutePlannerController extends Notifier<RoadRoutePlannerState> {
       state = state.copyWith(
         originSuggestions: locations,
         isSearchingOrigin: false,
-        clearOriginSearchMessage: true,
+        originSearchMessage: locations.isEmpty
+            ? 'No encontramos coincidencias. Prueba con otra forma de escribir la ubicación.'
+            : null,
+        clearOriginSearchMessage: locations.isNotEmpty,
       );
-    } catch (_) {
+    } catch (error, stackTrace) {
+      developer.log(
+        'Falló la búsqueda del punto de partida.',
+        name: 'rumbo.road_routes',
+        error: error,
+        stackTrace: stackTrace,
+      );
+
       if (_disposed || requestVersion != _originSearchVersion) {
         return;
       }
@@ -267,8 +283,7 @@ class RoadRoutePlannerController extends Notifier<RoadRoutePlannerState> {
       state = state.copyWith(
         originSuggestions: const [],
         isSearchingOrigin: false,
-        originSearchMessage:
-            'No fue posible buscar ubicaciones en este momento.',
+        originSearchMessage: 'No fue posible buscar ubicaciones. Comprueba tu conexión e inténtalo nuevamente.',
       );
     }
   }
@@ -287,9 +302,12 @@ class RoadRoutePlannerController extends Notifier<RoadRoutePlannerState> {
     );
 
     try {
+      final searchCenter =
+          state.origin?.coordinate ?? HereRoutingService.defaultSearchCenter;
+
       final locations = await ref
           .read(hereRoutingServiceProvider)
-          .searchLocations(query: query, at: state.origin?.coordinate);
+          .searchLocations(query: query, at: searchCenter);
 
       if (_disposed || requestVersion != _destinationSearchVersion) {
         return;
@@ -298,9 +316,19 @@ class RoadRoutePlannerController extends Notifier<RoadRoutePlannerState> {
       state = state.copyWith(
         destinationSuggestions: locations,
         isSearchingDestination: false,
-        clearDestinationSearchMessage: true,
+        destinationSearchMessage: locations.isEmpty
+            ? 'No encontramos coincidencias. Prueba con otra forma de escribir la ubicación.'
+            : null,
+        clearDestinationSearchMessage: locations.isNotEmpty,
       );
-    } catch (_) {
+    } catch (error, stackTrace) {
+      developer.log(
+        'Falló la búsqueda del destino.',
+        name: 'rumbo.road_routes',
+        error: error,
+        stackTrace: stackTrace,
+      );
+
       if (_disposed || requestVersion != _destinationSearchVersion) {
         return;
       }
@@ -308,8 +336,7 @@ class RoadRoutePlannerController extends Notifier<RoadRoutePlannerState> {
       state = state.copyWith(
         destinationSuggestions: const [],
         isSearchingDestination: false,
-        destinationSearchMessage:
-            'No fue posible buscar ubicaciones en este momento.',
+        destinationSearchMessage: 'No fue posible buscar ubicaciones. Comprueba tu conexión e inténtalo nuevamente.',
       );
     }
   }
@@ -425,21 +452,31 @@ class RoadRoutePlannerController extends Notifier<RoadRoutePlannerState> {
         selectedRouteId: routes.isEmpty ? null : routes.first.id,
         clearSelectedRouteId: routes.isEmpty,
         routeCalculationMessage: routes.isEmpty
-            ? 'No encontramos rutas para este recorrido.'
+            ? 'HERE no encontró una ruta entre esos puntos. Prueba seleccionando ubicaciones cercanas a una carretera.'
             : null,
         clearRouteCalculationMessage: routes.isNotEmpty,
       );
-    } catch (_) {
+    } catch (error, stackTrace) {
+      developer.log(
+        'Falló el cálculo de un recorrido.',
+        name: 'rumbo.road_routes',
+        error: error,
+        stackTrace: stackTrace,
+      );
+
       if (_disposed || requestVersion != _routeRequestVersion) {
         return;
       }
+
+      final message = error is HereApiException
+          ? error.message
+          : 'No fue posible calcular la ruta. Inténtalo nuevamente.';
 
       state = state.copyWith(
         routes: const [],
         isCalculatingRoutes: false,
         clearSelectedRouteId: true,
-        routeCalculationMessage:
-            'No fue posible calcular la ruta. Inténtalo nuevamente.',
+        routeCalculationMessage: message,
       );
     }
   }
