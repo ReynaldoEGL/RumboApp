@@ -33,11 +33,6 @@ class HereRoutingService {
   static const String _searchPath = '/v1/autosuggest';
   static const String _routingPath = '/v8/routes';
 
-  static const RouteCoordinate defaultSearchCenter = RouteCoordinate(
-    latitude: 23.6345,
-    longitude: -102.5528,
-  );
-
   final String _apiKey;
   final http.Client _client;
   final bool _ownsClient;
@@ -55,9 +50,7 @@ class HereRoutingService {
       return const [];
     }
 
-    final center = at ?? defaultSearchCenter;
-
-    if (!center.isValid) {
+    if (at != null && !at.isValid) {
       throw const FormatException(
         'El centro de búsqueda no contiene coordenadas válidas.',
       );
@@ -73,14 +66,19 @@ class HereRoutingService {
 
     final apiKey = _validatedApiKey();
 
-    final uri = Uri.https(_searchHost, _searchPath, {
+    final queryParameters = <String, String>{
       'q': normalizedQuery,
-      'at': _formatCoordinate(center),
       'limit': '$limit',
       'lang': language.trim(),
       'mobilityMode': 'car',
       'apiKey': apiKey,
-    });
+    };
+
+    if (at != null) {
+      queryParameters['at'] = _formatCoordinate(at);
+    }
+
+    final uri = Uri.https(_searchHost, _searchPath, queryParameters);
 
     final payload = await _requestJson(uri);
     final rawItems = payload['items'];
