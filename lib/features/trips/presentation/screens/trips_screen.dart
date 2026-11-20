@@ -60,10 +60,11 @@ class TripsScreen extends ConsumerWidget {
             },
             error: (error, stackTrace) {
               return const _TripMessage(
-                icon: Icons.error_outline_rounded,
-                title: 'No pudimos cargar tus viajes',
+                icon: Icons.info_outline_rounded,
+                title: 'Tus viajes no están disponibles',
                 description:
-                    'Comprueba tu conexión y los permisos de Firebase.',
+                    'No fue posible mostrar tus viajes en este momento. '
+                    'Inténtalo nuevamente.',
               );
             },
             data: (trips) {
@@ -152,7 +153,11 @@ class TripsScreen extends ConsumerWidget {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No fue posible eliminar el viaje: $error')),
+        const SnackBar(
+          content: Text(
+            'No fue posible eliminar el viaje. Inténtalo nuevamente.',
+          ),
+        ),
       );
     }
   }

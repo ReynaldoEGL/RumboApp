@@ -499,7 +499,17 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
   Future<void> _saveTrip({required List<Vehicle> vehicles}) async {
     FocusScope.of(context).unfocus();
 
-    if (!_formKey.currentState!.validate()) {
+    final formState = _formKey.currentState;
+
+    if (formState == null || !formState.validate()) {
+      return;
+    }
+
+    final title = _titleController.text.trim();
+    final origin = _originController.text.trim();
+    final destination = _destinationController.text.trim();
+
+    if (title.isEmpty || origin.isEmpty || destination.isEmpty) {
       return;
     }
 
@@ -507,7 +517,6 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
     final selections = ref.read(formProvider);
 
     final distanceKm = _readOptionalPositiveNumber(_distanceController);
-
     final energyPrice = _readOptionalPositiveNumber(_energyPriceController);
 
     final currencyCode = _currencyController.text.trim().toUpperCase();
@@ -532,7 +541,8 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'No fue posible recuperar los datos del vehículo seleccionado.',
+            'El vehículo seleccionado ya no está disponible. '
+            'Selecciona otro o continúa sin vehículo.',
           ),
         ),
       );
@@ -544,9 +554,9 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
 
     final trip = Trip(
       id: existingTrip?.id ?? '',
-      title: _titleController.text.trim(),
-      origin: _originController.text.trim(),
-      destination: _destinationController.text.trim(),
+      title: title,
+      origin: origin,
+      destination: destination,
       departureDate: _departureDate,
       returnDate: _returnDate,
       vehicleId: selections.vehicleId,
@@ -563,6 +573,8 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
     final operation = ref.read(tripControllerProvider.notifier);
 
     try {
+      trip.validate();
+
       if (_isEditing) {
         await operation.updateTrip(trip);
       } else {
@@ -584,13 +596,17 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
       );
 
       Navigator.of(context).pop(true);
-    } catch (error) {
+    } catch (_) {
       if (!mounted) {
         return;
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No fue posible guardar el viaje: $error')),
+        const SnackBar(
+          content: Text(
+            'No fue posible guardar el viaje. Inténtalo nuevamente.',
+          ),
+        ),
       );
     }
   }
@@ -726,14 +742,6 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
                 vehicles: vehicles,
                 loading: vehiclesAsync.isLoading,
               ),
-              if (vehiclesAsync.hasError) ...[
-                const SizedBox(height: 8),
-                Text(
-                  'No se pudieron cargar los vehículos. '
-                  'Puedes guardar el viaje sin asignar uno.',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
               const SizedBox(height: 16),
               _textField(
                 controller: _distanceController,
@@ -756,8 +764,7 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Introduce la distancia total estimada en kilómetros. '
-                'Todavía no se calcula automáticamente con mapas.',
+                'Indica la distancia total aproximada del recorrido en kilómetros.',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 28),

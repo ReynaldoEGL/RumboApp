@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:firebase_database/firebase_database.dart';
 
 import 'package:rumboapp/features/trips/domain/trip.dart';
@@ -20,9 +22,7 @@ class TripRepository {
       }
 
       if (rawData is! Map) {
-        throw const FormatException(
-          'La estructura de viajes almacenada no es válida.',
-        );
+        throw const FormatException('La estructura almacenada no es válida.');
       }
 
       final trips = <Trip>[];
@@ -35,7 +35,18 @@ class TripRepository {
           continue;
         }
 
-        trips.add(Trip.fromMap(id, Map<Object?, Object?>.from(record)));
+        try {
+          final trip = Trip.fromMap(id, Map<Object?, Object?>.from(record));
+
+          trips.add(trip);
+        } catch (error, stackTrace) {
+          developer.log(
+            'Se omitió un registro de viaje con datos no válidos.',
+            name: 'rumbo.trips',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
       }
 
       trips.sort((a, b) {
@@ -53,6 +64,8 @@ class TripRepository {
   }
 
   Future<String> addTrip(String uid, Trip trip) async {
+    final data = trip.toMap();
+
     final reference = _tripsReference(uid).push();
     final id = reference.key;
 
@@ -62,24 +75,30 @@ class TripRepository {
       );
     }
 
-    await reference.set(trip.toMap());
+    await reference.set(data);
 
     return id;
   }
 
   Future<void> updateTrip(String uid, Trip trip) async {
-    if (trip.id.trim().isEmpty) {
+    final id = trip.id.trim();
+
+    if (id.isEmpty) {
       throw ArgumentError('No se puede actualizar un viaje sin identificador.');
     }
 
-    await _tripsReference(uid).child(trip.id).set(trip.toMap());
+    final data = trip.toMap();
+
+    await _tripsReference(uid).child(id).set(data);
   }
 
   Future<void> deleteTrip(String uid, String tripId) async {
-    if (tripId.trim().isEmpty) {
+    final id = tripId.trim();
+
+    if (id.isEmpty) {
       throw ArgumentError('El identificador del viaje no puede estar vacío.');
     }
 
-    await _tripsReference(uid).child(tripId).remove();
+    await _tripsReference(uid).child(id).remove();
   }
 }

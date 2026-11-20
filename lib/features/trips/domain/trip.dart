@@ -130,7 +130,65 @@ class Trip {
     );
   }
 
+  void validate() {
+    _validateRequiredText(title, 'El nombre del viaje');
+    _validateRequiredText(origin, 'El origen');
+    _validateRequiredText(destination, 'El destino');
+
+    if (!RegExp(r'^[A-Za-z]{3}$').hasMatch(currencyCode.trim())) {
+      throw const FormatException(
+        'El código de moneda debe contener tres letras.',
+      );
+    }
+
+    if (returnDate != null) {
+      final departure = _dateOnly(departureDate);
+      final returnValue = _dateOnly(returnDate!);
+
+      if (returnValue.isBefore(departure)) {
+        throw const FormatException(
+          'La fecha de regreso no puede ser anterior a la salida.',
+        );
+      }
+    }
+
+    _validateOptionalPositiveNumber(distanceKm, 'La distancia');
+    _validateOptionalPositiveNumber(energyUnitPrice, 'El precio energético');
+
+    if (vehicleId != null && vehicleId!.trim().isEmpty) {
+      throw const FormatException(
+        'El identificador del vehículo no es válido.',
+      );
+    }
+
+    final snapshot = vehicleSnapshot;
+
+    if (snapshot != null) {
+      _validateRequiredText(snapshot.id, 'El identificador del vehículo');
+      _validateRequiredText(snapshot.displayName, 'El nombre del vehículo');
+      _validateRequiredText(snapshot.fuelType, 'El tipo de combustible');
+
+      if (vehicleId != null && vehicleId!.trim() != snapshot.id.trim()) {
+        throw const FormatException(
+          'Los datos del vehículo asociado no coinciden.',
+        );
+      }
+
+      _validateOptionalPositiveNumber(
+        snapshot.fuelConsumptionKmPerLiter,
+        'El consumo de combustible',
+      );
+
+      _validateOptionalPositiveNumber(
+        snapshot.electricConsumptionKwhPer100Km,
+        'El consumo eléctrico',
+      );
+    }
+  }
+
   Map<String, dynamic> toMap() {
+    validate();
+
     return {
       'schemaVersion': 1,
       'title': title.trim(),
@@ -145,9 +203,8 @@ class Trip {
       if (vehicleId != null && vehicleId!.trim().isNotEmpty)
         'vehicleId': vehicleId!.trim(),
       if (vehicleSnapshot != null) 'vehicleSnapshot': vehicleSnapshot!.toMap(),
-      if (distanceKm != null && distanceKm! > 0) 'distanceKm': distanceKm,
-      if (energyUnitPrice != null && energyUnitPrice! > 0)
-        'energyUnitPrice': energyUnitPrice,
+      if (distanceKm != null) 'distanceKm': distanceKm,
+      if (energyUnitPrice != null) 'energyUnitPrice': energyUnitPrice,
       if (notes != null && notes!.trim().isNotEmpty) 'notes': notes!.trim(),
     };
   }
@@ -184,6 +241,22 @@ class Trip {
       createdAt: _integer(data['createdAt']),
       updatedAt: _integer(data['updatedAt']),
     );
+  }
+}
+
+void _validateRequiredText(String value, String fieldName) {
+  if (value.trim().isEmpty) {
+    throw FormatException('$fieldName es obligatorio.');
+  }
+}
+
+void _validateOptionalPositiveNumber(double? value, String fieldName) {
+  if (value == null) {
+    return;
+  }
+
+  if (!value.isFinite || value <= 0) {
+    throw FormatException('$fieldName debe ser mayor que cero.');
   }
 }
 
@@ -231,6 +304,10 @@ int _dateOnlyMilliseconds(DateTime date) {
   return DateTime(date.year, date.month, date.day).millisecondsSinceEpoch;
 }
 
+DateTime _dateOnly(DateTime date) {
+  return DateTime(date.year, date.month, date.day);
+}
+
 DateTime _dateFromMilliseconds(Object? value) {
   if (value is! num) {
     throw const FormatException('La fecha de salida del viaje no es válida.');
@@ -238,7 +315,7 @@ DateTime _dateFromMilliseconds(Object? value) {
 
   final date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
 
-  return DateTime(date.year, date.month, date.day);
+  return _dateOnly(date);
 }
 
 DateTime? _optionalDateFromMilliseconds(Object? value) {
@@ -248,7 +325,7 @@ DateTime? _optionalDateFromMilliseconds(Object? value) {
 
   final date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
 
-  return DateTime(date.year, date.month, date.day);
+  return _dateOnly(date);
 }
 
 String _currencyCode(Object? value) {
