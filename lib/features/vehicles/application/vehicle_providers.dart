@@ -1,14 +1,10 @@
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:rumboapp/core/providers/firebase_database_provider.dart';
 import 'package:rumboapp/features/auth/application/auth_providers.dart';
 
 import '../data/vehicle_repository.dart';
 import '../domain/vehicle.dart';
-
-final firebaseDatabaseProvider = Provider<FirebaseDatabase>((ref) {
-  return FirebaseDatabase.instance;
-});
 
 final vehicleRepositoryProvider = Provider<VehicleRepository>((ref) {
   return VehicleRepository(ref.watch(firebaseDatabaseProvider));
@@ -39,7 +35,7 @@ class VehicleController extends AsyncNotifier<void> {
       throw StateError('Debes iniciar sesión para administrar tus vehículos.');
     }
 
-    final bool usesPasswordProvider = user.providerData.any(
+    final usesPasswordProvider = user.providerData.any(
       (provider) => provider.providerId == 'password',
     );
 
@@ -55,7 +51,6 @@ class VehicleController extends AsyncNotifier<void> {
 
     try {
       final uid = _getAuthenticatedUid();
-
       final result = await operation(uid);
 
       state = const AsyncData<void>(null);

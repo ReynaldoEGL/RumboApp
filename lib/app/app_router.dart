@@ -7,6 +7,7 @@ import 'package:rumboapp/features/auth/presentation/screens/register_screen.dart
 import 'package:rumboapp/features/auth/presentation/screens/forgot_password_screen.dart';
 
 import 'package:rumboapp/features/vehicles/presentation/screens/vehicles_screen.dart';
+import 'package:rumboapp/features/trips/presentation/screens/trips_screen.dart';
 
 import 'package:rumboapp/features/shared/presentation/screens/feature_placeholder_screen.dart';
 
@@ -24,6 +25,9 @@ class AppRouter {
 
       case AppRoutes.vehicles:
         return _createRoute(settings, const VehiclesScreen());
+
+      case AppRoutes.trips:
+        return _createRoute(settings, const TripsScreen());
 
       case AppRoutes.documents:
         return _createRoute(
@@ -46,18 +50,6 @@ class AppRouter {
                 'Aquí podrás consultar recorridos, casetas '
                 'y estimaciones de gastos carreteros.',
             icon: Icons.route_outlined,
-          ),
-        );
-
-      case AppRoutes.trips:
-        return _createRoute(
-          settings,
-          const FeaturePlaceholderScreen(
-            title: 'Mis viajes',
-            description:
-                'Aquí podrás reunir itinerarios, presupuestos '
-                'y pendientes de viaje.',
-            icon: Icons.luggage_outlined,
           ),
         );
 
