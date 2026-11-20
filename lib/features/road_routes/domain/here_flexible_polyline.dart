@@ -4,14 +4,18 @@ class HereFlexiblePolyline {
   static const String _alphabet =
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
+  static const int _maxSafeInteger = 9007199254740991;
+
   static List<RouteCoordinate> decode(String encoded) {
-    if (encoded.isEmpty) {
+    final normalized = encoded.trim();
+
+    if (normalized.isEmpty) {
       throw const FormatException('La geometría de la ruta está vacía.');
     }
 
     var index = 0;
 
-    final versionResult = _decodeUnsigned(encoded, index);
+    final versionResult = _decodeUnsigned(normalized, index);
     final version = versionResult.value;
     index = versionResult.nextIndex;
 
@@ -21,49 +25,78 @@ class HereFlexiblePolyline {
       );
     }
 
-    final headerResult = _decodeUnsigned(encoded, index);
+    final headerResult = _decodeUnsigned(normalized, index);
     final header = headerResult.value;
     index = headerResult.nextIndex;
 
-    final precision = header & 0x0F;
-    final thirdDimension = (header >> 4) & 0x07;
+    final precision = header % 16;
+    final thirdDimension = (header ~/ 16) % 8;
+    final thirdDimensionPrecision = (header ~/ 128) % 16;
 
     final coordinateFactor = _powerOfTen(precision);
-
-    final coordinates = <RouteCoordinate>[];
+    final thirdDimensionFactor = _powerOfTen(thirdDimensionPrecision);
 
     var accumulatedLatitude = 0;
     var accumulatedLongitude = 0;
 
-    while (index < encoded.length) {
-      final latitudeResult = _decodeUnsigned(encoded, index);
+    final coordinates = <RouteCoordinate>[];
+
+    var pointIndex = 0;
+
+    while (index < normalized.length) {
+      final latitudeResult = _decodeUnsigned(normalized, index);
       index = latitudeResult.nextIndex;
 
-      final longitudeResult = _decodeUnsigned(encoded, index);
+      final longitudeResult = _decodeUnsigned(normalized, index);
       index = longitudeResult.nextIndex;
 
-      accumulatedLatitude += _decodeSigned(latitudeResult.value);
-      accumulatedLongitude += _decodeSigned(longitudeResult.value);
+      accumulatedLatitude = _addChecked(
+        accumulatedLatitude,
+        _decodeSigned(latitudeResult.value),
+      );
+
+      accumulatedLongitude = _addChecked(
+        accumulatedLongitude,
+        _decodeSigned(longitudeResult.value),
+      );
 
       if (thirdDimension != 0) {
-        final thirdDimensionResult = _decodeUnsigned(encoded, index);
+        final thirdDimensionResult = _decodeUnsigned(normalized, index);
         index = thirdDimensionResult.nextIndex;
 
-        _decodeSigned(thirdDimensionResult.value);
+        final thirdDimensionValue = _decodeSigned(thirdDimensionResult.value);
+
+        final decodedThirdDimension =
+            thirdDimensionValue / thirdDimensionFactor;
+
+        if (!decodedThirdDimension.isFinite) {
+          throw const FormatException(
+            'La tercera dimensión de la geometría no es válida.',
+          );
+        }
       }
 
+      final latitude = accumulatedLatitude / coordinateFactor;
+      final longitude = accumulatedLongitude / coordinateFactor;
+
       final coordinate = RouteCoordinate(
-        latitude: accumulatedLatitude / coordinateFactor,
-        longitude: accumulatedLongitude / coordinateFactor,
+        latitude: latitude,
+        longitude: longitude,
       );
 
       if (!coordinate.isValid) {
-        throw const FormatException(
-          'La geometría contiene coordenadas fuera de rango.',
+        throw FormatException(
+          'La geometría contiene coordenadas fuera de rango. '
+          'Punto: $pointIndex. '
+          'Latitud: ${latitude.toStringAsFixed(7)}. '
+          'Longitud: ${longitude.toStringAsFixed(7)}. '
+          'Precisión: $precision. '
+          'Tercera dimensión: $thirdDimension.',
         );
       }
 
       coordinates.add(coordinate);
+      pointIndex++;
     }
 
     if (coordinates.isEmpty) {
@@ -75,7 +108,7 @@ class HereFlexiblePolyline {
 
   static _DecodedValue _decodeUnsigned(String encoded, int startIndex) {
     var index = startIndex;
-    var shift = 0;
+    var multiplier = 1;
     var value = 0;
 
     while (true) {
@@ -91,32 +124,50 @@ class HereFlexiblePolyline {
         );
       }
 
-      value |= (chunk & 0x1F) << shift;
+      final payload = chunk % 32;
+      final maximumPayload = (_maxSafeInteger - value) ~/ multiplier;
 
-      index++;
-
-      if ((chunk & 0x20) == 0) {
-        break;
-      }
-
-      shift += 5;
-
-      if (shift > 60) {
+      if (payload > maximumPayload) {
         throw const FormatException(
-          'La geometría contiene un valor demasiado grande.',
+          'La geometría contiene un valor numérico demasiado grande.',
         );
       }
-    }
 
-    return _DecodedValue(value, index);
+      value += payload * multiplier;
+      index++;
+
+      if (chunk < 32) {
+        return _DecodedValue(value, index);
+      }
+
+      if (multiplier > _maxSafeInteger ~/ 32) {
+        throw const FormatException(
+          'La geometría contiene un valor numérico demasiado grande.',
+        );
+      }
+
+      multiplier *= 32;
+    }
   }
 
   static int _decodeSigned(int value) {
-    if ((value & 1) == 1) {
-      return ~(value >> 1);
+    if (value.isOdd) {
+      return -((value + 1) ~/ 2);
     }
 
-    return value >> 1;
+    return value ~/ 2;
+  }
+
+  static int _addChecked(int current, int delta) {
+    final result = current + delta;
+
+    if (result.abs() > _maxSafeInteger) {
+      throw const FormatException(
+        'La geometría contiene un desplazamiento numérico demasiado grande.',
+      );
+    }
+
+    return result;
   }
 
   static double _powerOfTen(int precision) {
