@@ -1,3 +1,4 @@
+import 'package:rumboapp/features/road_routes/domain/road_route.dart';
 import 'package:rumboapp/features/trips/domain/trip_energy_estimate.dart';
 import 'package:rumboapp/features/vehicles/domain/vehicle.dart';
 
@@ -93,6 +94,7 @@ class Trip {
     this.vehicleSnapshot,
     this.distanceKm,
     this.energyUnitPrice,
+    this.routeSnapshot,
     this.notes,
   });
 
@@ -106,6 +108,7 @@ class Trip {
   final TripVehicleSnapshot? vehicleSnapshot;
   final double? distanceKm;
   final double? energyUnitPrice;
+  final RoadRoute? routeSnapshot;
   final String currencyCode;
   final TripStatus status;
   final String? notes;
@@ -161,28 +164,61 @@ class Trip {
       );
     }
 
-    final snapshot = vehicleSnapshot;
+    final vehicle = vehicleSnapshot;
 
-    if (snapshot != null) {
-      _validateRequiredText(snapshot.id, 'El identificador del vehículo');
-      _validateRequiredText(snapshot.displayName, 'El nombre del vehículo');
-      _validateRequiredText(snapshot.fuelType, 'El tipo de combustible');
+    if (vehicle != null) {
+      _validateRequiredText(vehicle.id, 'El identificador del vehículo');
+      _validateRequiredText(vehicle.displayName, 'El nombre del vehículo');
+      _validateRequiredText(vehicle.fuelType, 'El tipo de combustible');
 
-      if (vehicleId != null && vehicleId!.trim() != snapshot.id.trim()) {
+      if (vehicleId != null && vehicleId!.trim() != vehicle.id.trim()) {
         throw const FormatException(
           'Los datos del vehículo asociado no coinciden.',
         );
       }
 
       _validateOptionalPositiveNumber(
-        snapshot.fuelConsumptionKmPerLiter,
+        vehicle.fuelConsumptionKmPerLiter,
         'El consumo de combustible',
       );
 
       _validateOptionalPositiveNumber(
-        snapshot.electricConsumptionKwhPer100Km,
+        vehicle.electricConsumptionKwhPer100Km,
         'El consumo eléctrico',
       );
+    }
+
+    final route = routeSnapshot;
+
+    if (route != null) {
+      _validateRequiredText(route.id, 'El identificador del recorrido');
+
+      if (origin.trim() != route.origin.addressLabel.trim()) {
+        throw const FormatException(
+          'El origen no coincide con el recorrido seleccionado.',
+        );
+      }
+
+      if (destination.trim() != route.destination.addressLabel.trim()) {
+        throw const FormatException(
+          'El destino no coincide con el recorrido seleccionado.',
+        );
+      }
+
+      final routeDistance = route.distanceKilometers;
+
+      if (!routeDistance.isFinite || routeDistance <= 0) {
+        throw const FormatException(
+          'La distancia del recorrido seleccionado no es válida.',
+        );
+      }
+
+      if (distanceKm == null ||
+          (distanceKm! - routeDistance).abs() > 0.000001) {
+        throw const FormatException(
+          'La distancia no coincide con el recorrido seleccionado.',
+        );
+      }
     }
   }
 
@@ -205,6 +241,7 @@ class Trip {
       if (vehicleSnapshot != null) 'vehicleSnapshot': vehicleSnapshot!.toMap(),
       if (distanceKm != null) 'distanceKm': distanceKm,
       if (energyUnitPrice != null) 'energyUnitPrice': energyUnitPrice,
+      if (routeSnapshot != null) 'routeSnapshot': routeSnapshot!.toMap(),
       if (notes != null && notes!.trim().isNotEmpty) 'notes': notes!.trim(),
     };
   }
@@ -212,13 +249,21 @@ class Trip {
   factory Trip.fromMap(String id, Map<Object?, Object?> rawData) {
     final data = Map<String, Object?>.from(rawData);
 
-    TripVehicleSnapshot? snapshot;
+    TripVehicleSnapshot? vehicleSnapshot;
+    RoadRoute? routeSnapshot;
 
-    final rawSnapshot = data['vehicleSnapshot'];
+    final rawVehicleSnapshot = data['vehicleSnapshot'];
+    final rawRouteSnapshot = data['routeSnapshot'];
 
-    if (rawSnapshot is Map) {
-      snapshot = TripVehicleSnapshot.fromMap(
-        Map<Object?, Object?>.from(rawSnapshot),
+    if (rawVehicleSnapshot is Map) {
+      vehicleSnapshot = TripVehicleSnapshot.fromMap(
+        Map<Object?, Object?>.from(rawVehicleSnapshot),
+      );
+    }
+
+    if (rawRouteSnapshot is Map) {
+      routeSnapshot = RoadRoute.fromMap(
+        Map<Object?, Object?>.from(rawRouteSnapshot),
       );
     }
 
@@ -231,10 +276,11 @@ class Trip {
       destination: _requiredString(data, 'destination'),
       departureDate: _dateFromMilliseconds(data['departureDate']),
       returnDate: _optionalDateFromMilliseconds(data['returnDate']),
-      vehicleId: storedVehicleId ?? snapshot?.id,
-      vehicleSnapshot: snapshot,
+      vehicleId: storedVehicleId ?? vehicleSnapshot?.id,
+      vehicleSnapshot: vehicleSnapshot,
       distanceKm: _positiveDouble(data['distanceKm']),
       energyUnitPrice: _positiveDouble(data['energyUnitPrice']),
+      routeSnapshot: routeSnapshot,
       currencyCode: _currencyCode(data['currencyCode']),
       status: TripStatusPresentation.fromValue(data['status']),
       notes: _optionalString(data['notes']),

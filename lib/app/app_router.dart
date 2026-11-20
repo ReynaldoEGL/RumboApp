@@ -8,6 +8,7 @@ import 'package:rumboapp/features/auth/presentation/screens/forgot_password_scre
 
 import 'package:rumboapp/features/vehicles/presentation/screens/vehicles_screen.dart';
 import 'package:rumboapp/features/trips/presentation/screens/trips_screen.dart';
+import 'package:rumboapp/features/road_routes/presentation/screens/road_routes_screen.dart';
 
 import 'package:rumboapp/features/shared/presentation/screens/feature_placeholder_screen.dart';
 
@@ -29,6 +30,9 @@ class AppRouter {
       case AppRoutes.trips:
         return _createRoute(settings, const TripsScreen());
 
+      case AppRoutes.roadRoutes:
+        return _createRoute(settings, const RoadRoutesScreen());
+
       case AppRoutes.documents:
         return _createRoute(
           settings,
@@ -38,18 +42,6 @@ class AppRouter {
                 'Aquí podrás organizar pasaportes, visas, '
                 'identificaciones y fechas de vencimiento.',
             icon: Icons.folder_copy_outlined,
-          ),
-        );
-
-      case AppRoutes.roadRoutes:
-        return _createRoute(
-          settings,
-          const FeaturePlaceholderScreen(
-            title: 'Rutas y casetas',
-            description:
-                'Aquí podrás consultar recorridos, casetas '
-                'y estimaciones de gastos carreteros.',
-            icon: Icons.route_outlined,
           ),
         );
 

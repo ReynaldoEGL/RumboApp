@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:rumboapp/features/auth/application/auth_providers.dart';
 
+import 'package:rumboapp/features/road_routes/domain/road_route.dart';
+
 import 'package:rumboapp/features/trips/application/trip_form_provider.dart';
 import 'package:rumboapp/features/trips/application/trip_providers.dart';
 
@@ -14,9 +16,11 @@ import 'package:rumboapp/features/vehicles/application/vehicle_providers.dart';
 import 'package:rumboapp/features/vehicles/domain/vehicle.dart';
 
 class TripFormScreen extends ConsumerStatefulWidget {
-  const TripFormScreen({super.key, this.trip});
+  const TripFormScreen({super.key, this.trip, this.route})
+    : assert(trip == null || route == null);
 
   final Trip? trip;
+  final RoadRoute? route;
 
   @override
   ConsumerState<TripFormScreen> createState() => _TripFormScreenState();
@@ -42,14 +46,23 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
 
   bool get _isEditing => widget.trip != null;
 
+  RoadRoute? get _routeSnapshot {
+    return widget.route ?? widget.trip?.routeSnapshot;
+  }
+
+  bool get _hasRouteSnapshot {
+    return _routeSnapshot != null;
+  }
+
   TripFormArgs get _formArgs {
     final trip = widget.trip;
+    final route = widget.route;
 
     return (
       sessionKey: _sessionKey,
       vehicleId: trip?.vehicleId,
       status: trip?.status ?? TripStatus.planned,
-      distanceKm: trip?.distanceKm,
+      distanceKm: trip?.distanceKm ?? route?.distanceKilometers,
       energyUnitPrice: trip?.energyUnitPrice,
       currencyCode: trip?.currencyCode ?? 'MXN',
     );
@@ -60,6 +73,7 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
     super.initState();
 
     final trip = widget.trip;
+    final route = _routeSnapshot;
 
     if (trip != null) {
       _departureDate = DateUtils.dateOnly(trip.departureDate);
@@ -69,12 +83,18 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
           : DateUtils.dateOnly(trip.returnDate!);
     }
 
-    _titleController = TextEditingController(text: trip?.title ?? '');
+    _titleController = TextEditingController(
+      text:
+          trip?.title ??
+          (route == null ? '' : 'Viaje a ${route.destination.title}'),
+    );
 
-    _originController = TextEditingController(text: trip?.origin ?? '');
+    _originController = TextEditingController(
+      text: trip?.origin ?? route?.origin.addressLabel ?? '',
+    );
 
     _destinationController = TextEditingController(
-      text: trip?.destination ?? '',
+      text: trip?.destination ?? route?.destination.addressLabel ?? '',
     );
 
     _departureDateController = TextEditingController(
@@ -86,7 +106,10 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
     );
 
     _distanceController = TextEditingController(
-      text: trip?.distanceKm?.toString() ?? '',
+      text:
+          trip?.distanceKm?.toString() ??
+          route?.distanceKilometers.toStringAsFixed(3) ??
+          '',
     );
 
     _energyPriceController = TextEditingController(
@@ -225,13 +248,15 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
 
     final selected = DateUtils.dateOnly(pickedDate);
 
-    if (isDepartureDate) {
-      _departureDate = selected;
-      _departureDateController.text = _formatDate(selected);
-    } else {
-      _returnDate = selected;
-      _returnDateController.text = _formatDate(selected);
-    }
+    setState(() {
+      if (isDepartureDate) {
+        _departureDate = selected;
+        _departureDateController.text = _formatDate(selected);
+      } else {
+        _returnDate = selected;
+        _returnDateController.text = _formatDate(selected);
+      }
+    });
   }
 
   Widget _dateField({
@@ -324,6 +349,7 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
     ValueChanged<String>? onChanged,
     TextCapitalization textCapitalization = TextCapitalization.none,
     int maxLines = 1,
+    bool readOnly = false,
   }) {
     return TextFormField(
       controller: controller,
@@ -338,11 +364,13 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
       onChanged: onChanged,
       textCapitalization: textCapitalization,
       maxLines: maxLines,
+      readOnly: readOnly,
     );
   }
 
   Widget _statusDropdown(TripFormSelections selections) {
     return DropdownButtonFormField<TripStatus>(
+      key: ValueKey(selections.status),
       initialValue: selections.status,
       isExpanded: true,
       decoration: const InputDecoration(
@@ -402,6 +430,7 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
     }
 
     return DropdownButtonFormField<String>(
+      key: ValueKey(selectedId ?? 'no-vehicle'),
       initialValue: selectedId ?? '',
       isExpanded: true,
       decoration: InputDecoration(
@@ -496,6 +525,80 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
     );
   }
 
+  Widget _routeSnapshotCard(RoadRoute route) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final distance = route.distanceKilometers.toStringAsFixed(1);
+    final duration = Duration(seconds: route.durationSeconds);
+
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+
+    final durationLabel = hours == 0
+        ? '$minutes min'
+        : minutes == 0
+        ? '$hours h'
+        : '$hours h $minutes min';
+
+    final tollCount = route.tolls.length;
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: colorScheme.outlineVariant),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.route_rounded, color: colorScheme.primary),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Text(
+                    'Ruta seleccionada',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                Icon(Icons.verified_rounded, color: colorScheme.primary),
+              ],
+            ),
+            const SizedBox(height: 13),
+            Text(
+              '$distance km · $durationLabel',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 7),
+            Text(
+              tollCount == 0
+                  ? 'No se reportaron registros de peaje en esta alternativa.'
+                  : '$tollCount registros de peaje disponibles.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 9),
+            Text(
+              'El trazado y los datos disponibles de los peajes '
+              'se conservarán junto con este viaje.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _saveTrip({required List<Vehicle> vehicles}) async {
     FocusScope.of(context).unfocus();
 
@@ -513,10 +616,14 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
       return;
     }
 
-    final formProvider = tripFormProvider(_formArgs);
-    final selections = ref.read(formProvider);
+    final selections = ref.read(tripFormProvider(_formArgs));
 
-    final distanceKm = _readOptionalPositiveNumber(_distanceController);
+    final routeSnapshot = _routeSnapshot;
+
+    final distanceKm =
+        routeSnapshot?.distanceKilometers ??
+        _readOptionalPositiveNumber(_distanceController);
+
     final energyPrice = _readOptionalPositiveNumber(_energyPriceController);
 
     final currencyCode = _currencyController.text.trim().toUpperCase();
@@ -532,12 +639,12 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
       return;
     }
 
-    final snapshot = _resolveSnapshot(
+    final vehicleSnapshot = _resolveSnapshot(
       vehicles: vehicles,
       selections: selections,
     );
 
-    if (selections.vehicleId != null && snapshot == null) {
+    if (selections.vehicleId != null && vehicleSnapshot == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -560,9 +667,10 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
       departureDate: _departureDate,
       returnDate: _returnDate,
       vehicleId: selections.vehicleId,
-      vehicleSnapshot: snapshot,
+      vehicleSnapshot: vehicleSnapshot,
       distanceKm: distanceKm,
       energyUnitPrice: energyPrice,
+      routeSnapshot: routeSnapshot,
       currencyCode: currencyCode,
       status: selections.status,
       notes: _readOptionalText(_notesController),
@@ -616,11 +724,14 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
     final authState = ref.watch(authUserProvider);
 
     return authState.when(
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (error, stackTrace) => const Scaffold(
-        body: Center(child: Text('No fue posible comprobar la sesión.')),
-      ),
+      loading: () {
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      },
+      error: (error, stackTrace) {
+        return const Scaffold(
+          body: Center(child: Text('No fue posible comprobar la sesión.')),
+        );
+      },
       data: (user) {
         if (user == null) {
           return const Scaffold(
@@ -644,22 +755,25 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
 
     final vehicles = vehiclesAsync.asData?.value ?? <Vehicle>[];
 
-    final snapshot = _resolveSnapshot(
+    final vehicleSnapshot = _resolveSnapshot(
       vehicles: vehicles,
       selections: selections,
     );
 
     final estimate = calculateTripEnergyEstimate(
-      fuelType: snapshot?.fuelType,
+      fuelType: vehicleSnapshot?.fuelType,
       distanceKm: selections.distanceKm,
       energyUnitPrice: selections.energyUnitPrice,
-      fuelConsumptionKmPerLiter: snapshot?.fuelConsumptionKmPerLiter,
-      electricConsumptionKwhPer100Km: snapshot?.electricConsumptionKwhPer100Km,
+      fuelConsumptionKmPerLiter: vehicleSnapshot?.fuelConsumptionKmPerLiter,
+      electricConsumptionKwhPer100Km:
+          vehicleSnapshot?.electricConsumptionKwhPer100Km,
     );
 
-    final priceLabel = snapshot?.fuelType == 'electric'
+    final priceLabel = vehicleSnapshot?.fuelType == 'electric'
         ? 'Precio por kWh'
         : 'Precio por litro';
+
+    final routeSnapshot = _routeSnapshot;
 
     return Scaffold(
       appBar: AppBar(
@@ -693,6 +807,7 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
                 controller: _originController,
                 label: 'Origen',
                 hint: 'Ej. Celaya, Guanajuato',
+                readOnly: _hasRouteSnapshot,
                 validator: (value) {
                   return _validateRequired(value, fieldName: 'el origen');
                 },
@@ -703,6 +818,7 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
                 controller: _destinationController,
                 label: 'Destino',
                 hint: 'Ej. Querétaro, Querétaro',
+                readOnly: _hasRouteSnapshot,
                 validator: (value) {
                   return _validateRequired(value, fieldName: 'el destino');
                 },
@@ -753,7 +869,8 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
                 ],
-                onChanged: _updateDistance,
+                onChanged: _hasRouteSnapshot ? null : _updateDistance,
+                readOnly: _hasRouteSnapshot,
                 validator: (value) {
                   return _validatePositiveNumber(
                     value,
@@ -764,9 +881,15 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Indica la distancia total aproximada del recorrido en kilómetros.',
+                _hasRouteSnapshot
+                    ? 'Distancia obtenida del recorrido seleccionado.'
+                    : 'Indica la distancia total aproximada del recorrido en kilómetros.',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
+              if (routeSnapshot != null) ...[
+                const SizedBox(height: 12),
+                _routeSnapshotCard(routeSnapshot),
+              ],
               const SizedBox(height: 28),
               Text(
                 'Estimación de energía',

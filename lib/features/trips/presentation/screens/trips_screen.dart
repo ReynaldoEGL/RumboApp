@@ -6,6 +6,7 @@ import 'package:rumboapp/features/auth/application/auth_providers.dart';
 import 'package:rumboapp/features/trips/application/trip_providers.dart';
 import 'package:rumboapp/features/trips/domain/trip.dart';
 import 'package:rumboapp/features/trips/presentation/screens/trip_form_screen.dart';
+import 'package:rumboapp/features/trips/presentation/widgets/trip_route_preview_sheet.dart';
 
 class TripsScreen extends ConsumerWidget {
   const TripsScreen({super.key});
@@ -100,6 +101,14 @@ class TripsScreen extends ConsumerWidget {
                         onDelete: () {
                           _confirmDelete(context, ref, trip);
                         },
+                        onOpenRoute: trip.routeSnapshot == null
+                            ? null
+                            : () {
+                                TripRoutePreviewSheet.show(
+                                  context,
+                                  trip.routeSnapshot!,
+                                );
+                              },
                       ),
                     ),
                   ),
@@ -147,7 +156,7 @@ class TripsScreen extends ConsumerWidget {
 
     try {
       await ref.read(tripControllerProvider.notifier).deleteTrip(trip.id);
-    } catch (error) {
+    } catch (_) {
       if (!context.mounted) {
         return;
       }
@@ -168,11 +177,13 @@ class _TripCard extends StatelessWidget {
     required this.trip,
     required this.onEdit,
     required this.onDelete,
+    required this.onOpenRoute,
   });
 
   final Trip trip;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback? onOpenRoute;
 
   String _formatDate(DateTime date) {
     final day = date.day.toString().padLeft(2, '0');
@@ -214,8 +225,8 @@ class _TripCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
     final estimate = trip.energyEstimate;
+    final route = trip.routeSnapshot;
 
     return Card(
       elevation: 0,
@@ -339,6 +350,39 @@ class _TripCard extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+            ],
+            if (route != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.route_rounded,
+                      size: 20,
+                      color: colorScheme.primary,
+                    ),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: Text(
+                        '${route.tolls.length} registros de peaje',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: onOpenRoute,
+                      icon: const Icon(Icons.map_outlined, size: 18),
+                      label: const Text('Ver ruta'),
+                    ),
+                  ],
+                ),
               ),
             ],
             if (estimate != null) ...[
