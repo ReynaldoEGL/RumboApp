@@ -777,7 +777,8 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
             fuelType: vehicleSnapshot?.fuelType,
             distanceKm: selections.returnDistanceKm,
             energyUnitPrice: selections.energyUnitPrice,
-            fuelConsumptionKmPerLiter: vehicleSnapshot?.fuelConsumptionKmPerLiter,
+            fuelConsumptionKmPerLiter:
+                vehicleSnapshot?.fuelConsumptionKmPerLiter,
             electricConsumptionKwhPer100Km:
                 vehicleSnapshot?.electricConsumptionKwhPer100Km,
           )

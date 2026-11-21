@@ -22,10 +22,7 @@ class TripTollEstimate {
 }
 
 class TripLodgingEstimate {
-  const TripLodgingEstimate({
-    required this.nights,
-    required this.nightlyRate,
-  });
+  const TripLodgingEstimate({required this.nights, required this.nightlyRate});
 
   final int? nights;
   final double? nightlyRate;
@@ -83,15 +80,18 @@ class TripBudgetEstimate {
     return energy != null ||
         (tolls?.hasKnownPrices ?? false) ||
         lodging.isComplete ||
-        (includesReturn &&
-            (returnEnergy != null || returnTollsAmount != null));
+        (includesReturn && (returnEnergy != null || returnTollsAmount != null));
   }
 
   bool get isPartial {
     final outboundIncomplete =
-        energy == null || energy!.isPartial || tolls == null || !tolls!.isComplete;
+        energy == null ||
+        energy!.isPartial ||
+        tolls == null ||
+        !tolls!.isComplete;
 
-    final returnIncomplete = includesReturn &&
+    final returnIncomplete =
+        includesReturn &&
         (returnEnergy == null ||
             returnEnergy!.isPartial ||
             returnTollsAmount == null);
@@ -126,9 +126,7 @@ TripBudgetEstimate calculateTripBudgetEstimate({
 
   if (lodgingNightlyRate != null &&
       (!lodgingNightlyRate.isFinite || lodgingNightlyRate <= 0)) {
-    throw const FormatException(
-      'El precio por noche debe ser mayor que cero.',
-    );
+    throw const FormatException('El precio por noche debe ser mayor que cero.');
   }
 
   if (includeReturn &&
@@ -267,8 +265,7 @@ double? _fareAmountInCurrency(RouteTollFare fare, String currencyCode) {
     return fare.amount;
   }
 
-  if (convertedCurrency == currencyCode &&
-      _validAmount(fare.convertedAmount)) {
+  if (convertedCurrency == currencyCode && _validAmount(fare.convertedAmount)) {
     return fare.convertedAmount;
   }
 

@@ -51,21 +51,21 @@ class TripBudgetCard extends StatelessWidget {
     final tollLabel = tolls == null
         ? 'Sin información de peajes'
         : tolls.reportedTolls == 0
-            ? 'Sin peajes reportados'
-            : tolls.isComplete
-                ? _money(tolls.knownAmount, budget.currencyCode)
-                : tolls.hasKnownPrices
-                    ? '${_money(tolls.knownAmount, budget.currencyCode)} conocidos'
-                    : 'Tarifa pendiente';
+        ? 'Sin peajes reportados'
+        : tolls.isComplete
+        ? _money(tolls.knownAmount, budget.currencyCode)
+        : tolls.hasKnownPrices
+        ? '${_money(tolls.knownAmount, budget.currencyCode)} conocidos'
+        : 'Tarifa pendiente';
 
     final lodging = budget.lodging;
     final lodgingLabel = lodging.nights == null
         ? 'No especificado'
         : lodging.nights == 0
-            ? 'Sin hospedaje (0 noches)'
-            : lodging.cost == null
-                ? '${lodging.nights} noche(s) · falta tarifa'
-                : '${lodging.nights} noche(s) · ${_money(lodging.cost!, budget.currencyCode)}';
+        ? 'Sin hospedaje (0 noches)'
+        : lodging.cost == null
+        ? '${lodging.nights} noche(s) · falta tarifa'
+        : '${lodging.nights} noche(s) · ${_money(lodging.cost!, budget.currencyCode)}';
 
     return Card(
       elevation: 0,
@@ -118,7 +118,7 @@ class TripBudgetCard extends StatelessWidget {
             const SizedBox(height: 16),
             _BudgetLine(
               icon: Icons.toll_outlined,
-              label: 'Peajes de ida (HERE)',
+              label: 'Peajes de ida',
               value: tollLabel,
             ),
             if (tolls != null && tolls.unpricedTolls > 0) ...[
@@ -131,7 +131,7 @@ class TripBudgetCard extends StatelessWidget {
             if (tolls != null && tolls.reportedTolls == 0) ...[
               const SizedBox(height: 6),
               Text(
-                'HERE no reportó peajes; esto no garantiza que el recorrido sea gratuito.',
+                'No se encontraron peajes; esto no garantiza que el recorrido sea gratuito.',
                 style: theme.textTheme.bodySmall,
               ),
             ],
@@ -213,9 +213,7 @@ class TripBudgetCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Todos los precios manuales se interpretan en ${budget.currencyCode}; '
-              'cambiar el código de moneda no convierte sus valores. '
-              'Hospedaje y regreso todavía no se guardan en Firebase.',
+              'Todos los precios manuales se interpretan en ${budget.currencyCode}; ',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 height: 1.4,

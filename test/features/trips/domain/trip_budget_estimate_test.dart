@@ -12,7 +12,9 @@ void main() {
   group('TripBudgetEstimate', () {
     test('suma combustible y tarifa de peaje', () {
       final route = _route([
-        [_toll([_fare(id: 't1', amount: 150, currency: 'MXN')])],
+        [
+          _toll([_fare(id: 't1', amount: 150, currency: 'MXN')]),
+        ],
       ]);
       final budget = calculateTripBudgetEstimate(
         energy: _energy(480),
@@ -34,7 +36,10 @@ void main() {
           ]),
         ],
       ]);
-      final tolls = calculateTripTollEstimate(route: route, currencyCode: 'MXN');
+      final tolls = calculateTripTollEstimate(
+        route: route,
+        currencyCode: 'MXN',
+      );
       expect(tolls?.knownAmount, 0);
       expect(tolls?.unpricedTolls, 1);
       expect(tolls?.isComplete, isFalse);
@@ -49,7 +54,10 @@ void main() {
           ]),
         ],
       ]);
-      final tolls = calculateTripTollEstimate(route: route, currencyCode: 'MXN');
+      final tolls = calculateTripTollEstimate(
+        route: route,
+        currencyCode: 'MXN',
+      );
       expect(tolls?.knownAmount, 100);
       expect(tolls?.isComplete, isTrue);
     });
@@ -68,26 +76,41 @@ void main() {
           ]),
         ],
       ]);
-      final tolls = calculateTripTollEstimate(route: route, currencyCode: 'USD');
+      final tolls = calculateTripTollEstimate(
+        route: route,
+        currencyCode: 'USD',
+      );
       expect(tolls?.knownAmount, 10);
       expect(tolls?.isComplete, isTrue);
     });
 
     test('no mezcla monedas distintas', () {
       final route = _route([
-        [_toll([_fare(id: 't1', amount: 200, currency: 'MXN')])],
+        [
+          _toll([_fare(id: 't1', amount: 200, currency: 'MXN')]),
+        ],
       ]);
-      final tolls = calculateTripTollEstimate(route: route, currencyCode: 'USD');
+      final tolls = calculateTripTollEstimate(
+        route: route,
+        currencyCode: 'USD',
+      );
       expect(tolls?.knownAmount, 0);
       expect(tolls?.unpricedTolls, 1);
     });
 
     test('no duplica la misma tarifa entre tramos', () {
       final route = _route([
-        [_toll([_fare(id: 'shared', amount: 85, currency: 'MXN')])],
-        [_toll([_fare(id: 'shared', amount: 85, currency: 'MXN')])],
+        [
+          _toll([_fare(id: 'shared', amount: 85, currency: 'MXN')]),
+        ],
+        [
+          _toll([_fare(id: 'shared', amount: 85, currency: 'MXN')]),
+        ],
       ]);
-      final tolls = calculateTripTollEstimate(route: route, currencyCode: 'MXN');
+      final tolls = calculateTripTollEstimate(
+        route: route,
+        currencyCode: 'MXN',
+      );
       expect(tolls?.knownAmount, 85);
       expect(tolls?.reportedTolls, 1);
     });
@@ -99,7 +122,10 @@ void main() {
           _toll([]),
         ],
       ]);
-      final tolls = calculateTripTollEstimate(route: route, currencyCode: 'MXN');
+      final tolls = calculateTripTollEstimate(
+        route: route,
+        currencyCode: 'MXN',
+      );
       expect(tolls?.knownAmount, 50);
       expect(tolls?.unpricedTolls, 1);
       expect(tolls?.isComplete, isFalse);
@@ -269,10 +295,7 @@ RouteLocation _location(String id) {
     hereId: id,
     title: id,
     addressLabel: id,
-    coordinate: const RouteCoordinate(
-      latitude: 20.5235,
-      longitude: -100.8157,
-    ),
+    coordinate: const RouteCoordinate(latitude: 20.5235, longitude: -100.8157),
   );
 }
 

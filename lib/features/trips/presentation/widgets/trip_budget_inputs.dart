@@ -5,10 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rumboapp/features/trips/application/trip_form_provider.dart';
 
 class TripBudgetInputs extends ConsumerWidget {
-  const TripBudgetInputs({
-    super.key,
-    required this.formArgs,
-  });
+  const TripBudgetInputs({super.key, required this.formArgs});
 
   final TripFormArgs formArgs;
 
@@ -92,7 +89,8 @@ class TripBudgetInputs extends ConsumerWidget {
             decoration: const InputDecoration(
               labelText: 'Distancia del regreso (km)',
               hintText: 'Ej. 280',
-              helperText: 'Introduce la distancia estimada del trayecto de regreso.',
+              helperText:
+                  'Introduce la distancia estimada del trayecto de regreso.',
               border: OutlineInputBorder(),
             ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -111,7 +109,8 @@ class TripBudgetInputs extends ConsumerWidget {
             decoration: InputDecoration(
               labelText: 'Peajes del regreso ($currency)',
               hintText: 'Ej. 350',
-              helperText: 'Introduce 0 si confirmaste que no habrá peajes; '
+              helperText:
+                  'Introduce 0 si confirmaste que no habrá peajes; '
                   'déjalo vacío si aún no conoces el costo.',
               border: const OutlineInputBorder(),
             ),
@@ -137,7 +136,8 @@ class TripBudgetInputs extends ConsumerWidget {
     final normalized = value?.trim() ?? '';
     if (normalized.isEmpty) return null;
     final amount = _readDecimal(normalized);
-    if (amount == null || !amount.isFinite ||
+    if (amount == null ||
+        !amount.isFinite ||
         (allowZero ? amount < 0 : amount <= 0)) {
       return allowZero
           ? 'Ingresa un valor mayor o igual que cero.'
