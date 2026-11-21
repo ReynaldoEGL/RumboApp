@@ -18,6 +18,11 @@ class TripFormSelections {
     this.distanceKm,
     this.energyUnitPrice,
     this.currencyCode = 'MXN',
+    this.lodgingNights,
+    this.lodgingNightlyRate,
+    this.includeReturn = false,
+    this.returnDistanceKm,
+    this.returnTollsAmount,
   });
 
   final String? vehicleId;
@@ -25,6 +30,11 @@ class TripFormSelections {
   final double? distanceKm;
   final double? energyUnitPrice;
   final String currencyCode;
+  final int? lodgingNights;
+  final double? lodgingNightlyRate;
+  final bool includeReturn;
+  final double? returnDistanceKm;
+  final double? returnTollsAmount;
 
   TripFormSelections copyWith({
     String? vehicleId,
@@ -35,6 +45,15 @@ class TripFormSelections {
     double? energyUnitPrice,
     bool clearEnergyUnitPrice = false,
     String? currencyCode,
+    int? lodgingNights,
+    bool clearLodgingNights = false,
+    double? lodgingNightlyRate,
+    bool clearLodgingNightlyRate = false,
+    bool? includeReturn,
+    double? returnDistanceKm,
+    bool clearReturnDistanceKm = false,
+    double? returnTollsAmount,
+    bool clearReturnTollsAmount = false,
   }) {
     return TripFormSelections(
       vehicleId: clearVehicleId ? null : vehicleId ?? this.vehicleId,
@@ -44,6 +63,19 @@ class TripFormSelections {
           ? null
           : energyUnitPrice ?? this.energyUnitPrice,
       currencyCode: currencyCode ?? this.currencyCode,
+      lodgingNights: clearLodgingNights
+          ? null
+          : lodgingNights ?? this.lodgingNights,
+      lodgingNightlyRate: clearLodgingNightlyRate
+          ? null
+          : lodgingNightlyRate ?? this.lodgingNightlyRate,
+      includeReturn: includeReturn ?? this.includeReturn,
+      returnDistanceKm: clearReturnDistanceKm
+          ? null
+          : returnDistanceKm ?? this.returnDistanceKm,
+      returnTollsAmount: clearReturnTollsAmount
+          ? null
+          : returnTollsAmount ?? this.returnTollsAmount,
     );
   }
 }
@@ -77,27 +109,21 @@ class TripFormController extends Notifier<TripFormSelections> {
       return;
     }
 
-    if (normalized == state.vehicleId) {
-      return;
+    if (normalized != state.vehicleId) {
+      state = state.copyWith(vehicleId: normalized);
     }
-
-    state = state.copyWith(vehicleId: normalized);
   }
 
   void clearVehicle() {
-    if (state.vehicleId == null) {
-      return;
+    if (state.vehicleId != null) {
+      state = state.copyWith(clearVehicleId: true);
     }
-
-    state = state.copyWith(clearVehicleId: true);
   }
 
   void setStatus(TripStatus value) {
-    if (value == state.status) {
-      return;
+    if (value != state.status) {
+      state = state.copyWith(status: value);
     }
-
-    state = state.copyWith(status: value);
   }
 
   void setDistanceKm(double? value) {
@@ -106,11 +132,9 @@ class TripFormController extends Notifier<TripFormSelections> {
       return;
     }
 
-    if (value == state.distanceKm) {
-      return;
+    if (value != state.distanceKm) {
+      state = state.copyWith(distanceKm: value);
     }
-
-    state = state.copyWith(distanceKm: value);
   }
 
   void setEnergyUnitPrice(double? value) {
@@ -119,21 +143,67 @@ class TripFormController extends Notifier<TripFormSelections> {
       return;
     }
 
-    if (value == state.energyUnitPrice) {
-      return;
+    if (value != state.energyUnitPrice) {
+      state = state.copyWith(energyUnitPrice: value);
     }
-
-    state = state.copyWith(energyUnitPrice: value);
   }
 
   void setCurrencyCode(String value) {
     final normalized = value.trim().toUpperCase();
 
-    if (!RegExp(r'^[A-Z]{3}$').hasMatch(normalized) ||
-        normalized == state.currencyCode) {
+    if (RegExp(r'^[A-Z]{3}$').hasMatch(normalized) &&
+        normalized != state.currencyCode) {
+      state = state.copyWith(currencyCode: normalized);
+    }
+  }
+
+  void setLodgingNights(int? value) {
+    if (value == null || value < 0) {
+      state = state.copyWith(clearLodgingNights: true);
       return;
     }
 
-    state = state.copyWith(currencyCode: normalized);
+    if (value != state.lodgingNights) {
+      state = state.copyWith(lodgingNights: value);
+    }
+  }
+
+  void setLodgingNightlyRate(double? value) {
+    if (value == null || !value.isFinite || value <= 0) {
+      state = state.copyWith(clearLodgingNightlyRate: true);
+      return;
+    }
+
+    if (value != state.lodgingNightlyRate) {
+      state = state.copyWith(lodgingNightlyRate: value);
+    }
+  }
+
+  void setIncludeReturn(bool value) {
+    if (value != state.includeReturn) {
+      state = state.copyWith(includeReturn: value);
+    }
+  }
+
+  void setReturnDistanceKm(double? value) {
+    if (value == null || !value.isFinite || value <= 0) {
+      state = state.copyWith(clearReturnDistanceKm: true);
+      return;
+    }
+
+    if (value != state.returnDistanceKm) {
+      state = state.copyWith(returnDistanceKm: value);
+    }
+  }
+
+  void setReturnTollsAmount(double? value) {
+    if (value == null || !value.isFinite || value < 0) {
+      state = state.copyWith(clearReturnTollsAmount: true);
+      return;
+    }
+
+    if (value != state.returnTollsAmount) {
+      state = state.copyWith(returnTollsAmount: value);
+    }
   }
 }

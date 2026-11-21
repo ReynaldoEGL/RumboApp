@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
+import 'package:rumboapp/features/road_routes/application/device_location_provider.dart';
+import 'package:rumboapp/features/road_routes/data/device_location_service.dart';
 import 'package:rumboapp/features/road_routes/domain/road_route.dart';
 import 'package:rumboapp/features/road_routes/domain/route_coordinate.dart';
 import 'package:rumboapp/features/road_routes/domain/route_location.dart';
 
-class RoadRouteMap extends StatefulWidget {
+class RoadRouteMap extends ConsumerStatefulWidget {
   const RoadRouteMap({
     super.key,
     required this.origin,
@@ -21,14 +24,13 @@ class RoadRouteMap extends StatefulWidget {
   final RoadRoute? selectedRoute;
 
   @override
-  State<RoadRouteMap> createState() => _RoadRouteMapState();
+  ConsumerState<RoadRouteMap> createState() => _RoadRouteMapState();
 }
 
-class _RoadRouteMapState extends State<RoadRouteMap> {
+class _RoadRouteMapState extends ConsumerState<RoadRouteMap> {
   static const String _applicationId = 'com.example.rumboapp';
 
   final MapController _mapController = MapController();
-
   bool _mapReady = false;
 
   @override
@@ -41,7 +43,6 @@ class _RoadRouteMapState extends State<RoadRouteMap> {
       oldWidget.routes,
       oldWidget.selectedRoute,
     );
-
     final newSignature = _cameraSignature(
       widget.origin,
       widget.destination,
@@ -74,7 +75,7 @@ class _RoadRouteMapState extends State<RoadRouteMap> {
 
   void _onMapReady() {
     _mapReady = true;
-    _fitCamera();
+    _scheduleCameraFit();
   }
 
   void _scheduleCameraFit() {
@@ -108,9 +109,20 @@ class _RoadRouteMapState extends State<RoadRouteMap> {
   }
 
   void _fitCamera() {
+    if (!_mapReady) {
+      return;
+    }
+
     final points = _visibleCoordinates();
 
     if (points.isEmpty) {
+      final currentPosition = ref
+          .read(deviceLocationControllerProvider)
+          .asData
+          ?.value;
+      if (currentPosition != null) {
+        _mapController.move(_toLatLng(currentPosition.coordinate), 15);
+      }
       return;
     }
 
@@ -128,6 +140,36 @@ class _RoadRouteMapState extends State<RoadRouteMap> {
         maxZoom: 15,
       ),
     );
+  }
+
+  Future<void> _centerOnDevice() async {
+    try {
+      final location = await ref
+          .read(deviceLocationControllerProvider.notifier)
+          .getCurrentLocation();
+
+      if (!mounted || !_mapReady) {
+        return;
+      }
+
+      _mapController.move(_toLatLng(location.coordinate), 16);
+    } on DeviceLocationException catch (error) {
+      _showMessage(error.message);
+    } catch (_) {
+      _showMessage('No fue posible centrar el mapa en tu ubicación.');
+    }
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+      );
   }
 
   List<Polyline> _buildPolylines(ColorScheme colorScheme) {
@@ -160,10 +202,13 @@ class _RoadRouteMapState extends State<RoadRouteMap> {
     return polylines;
   }
 
-  List<Marker> _buildMarkers(ColorScheme colorScheme) {
+  List<Marker> _buildMarkers(
+    ColorScheme colorScheme,
+    RouteLocation? deviceLocation,
+  ) {
     final markers = <Marker>[];
-
     final origin = widget.origin;
+    final destination = widget.destination;
 
     if (origin != null) {
       markers.add(
@@ -174,13 +219,13 @@ class _RoadRouteMapState extends State<RoadRouteMap> {
           alignment: Alignment.center,
           child: _MapMarker(
             color: colorScheme.primary,
-            icon: Icons.trip_origin_rounded,
+            icon: origin.resultType == 'deviceLocation'
+                ? Icons.my_location_rounded
+                : Icons.trip_origin_rounded,
           ),
         ),
       );
     }
-
-    final destination = widget.destination;
 
     if (destination != null) {
       markers.add(
@@ -191,10 +236,29 @@ class _RoadRouteMapState extends State<RoadRouteMap> {
           alignment: Alignment.center,
           child: _MapMarker(
             color: colorScheme.tertiary,
-            icon: Icons.location_on_rounded,
+            icon: destination.resultType == 'deviceLocation'
+                ? Icons.my_location_rounded
+                : Icons.location_on_rounded,
           ),
         ),
       );
+    }
+
+    if (deviceLocation != null) {
+      final shownAsOrigin = origin?.hereId == deviceLocation.hereId;
+      final shownAsDestination = destination?.hereId == deviceLocation.hereId;
+
+      if (!shownAsOrigin && !shownAsDestination) {
+        markers.add(
+          Marker(
+            point: _toLatLng(deviceLocation.coordinate),
+            width: 34,
+            height: 34,
+            alignment: Alignment.center,
+            child: _CurrentGpsMarker(color: colorScheme.primary),
+          ),
+        );
+      }
     }
 
     return markers;
@@ -209,10 +273,13 @@ class _RoadRouteMapState extends State<RoadRouteMap> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final locationState = ref.watch(deviceLocationControllerProvider);
+    final deviceLocation = locationState.asData?.value;
 
     final centerCoordinate =
         widget.origin?.coordinate ??
         widget.destination?.coordinate ??
+        deviceLocation?.coordinate ??
         const RouteCoordinate(latitude: 23.6345, longitude: -102.5528);
 
     return ClipRRect(
@@ -241,9 +308,48 @@ class _RoadRouteMapState extends State<RoadRouteMap> {
                 ),
                 if (widget.routes.isNotEmpty)
                   PolylineLayer(polylines: _buildPolylines(colorScheme)),
-                if (widget.origin != null || widget.destination != null)
-                  MarkerLayer(markers: _buildMarkers(colorScheme)),
+                if (widget.origin != null ||
+                    widget.destination != null ||
+                    deviceLocation != null)
+                  MarkerLayer(
+                    markers: _buildMarkers(colorScheme, deviceLocation),
+                  ),
               ],
+            ),
+            Positioned(
+              top: 10,
+              right: 10,
+              child: Material(
+                color: colorScheme.surface.withValues(alpha: 0.96),
+                elevation: 2,
+                borderRadius: BorderRadius.circular(14),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      tooltip: 'Centrar en mi ubicación actual',
+                      onPressed: locationState.isLoading
+                          ? null
+                          : _centerOnDevice,
+                      icon: locationState.isLoading
+                          ? const SizedBox(
+                              width: 19,
+                              height: 19,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.my_location_rounded),
+                    ),
+                    if (widget.routes.isNotEmpty ||
+                        widget.origin != null ||
+                        widget.destination != null)
+                      IconButton(
+                        tooltip: 'Mostrar el recorrido completo',
+                        onPressed: _fitCamera,
+                        icon: const Icon(Icons.zoom_out_map_rounded),
+                      ),
+                  ],
+                ),
+              ),
             ),
             Positioned(
               right: 8,
@@ -293,6 +399,38 @@ class _MapMarker extends StatelessWidget {
         ],
       ),
       child: Icon(icon, color: Colors.white, size: 22),
+    );
+  }
+}
+
+class _CurrentGpsMarker extends StatelessWidget {
+  const _CurrentGpsMarker({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Última ubicación GPS obtenida',
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withValues(alpha: 0.18),
+        ),
+        alignment: Alignment.center,
+        child: Container(
+          width: 18,
+          height: 18,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Theme.of(context).colorScheme.surface,
+              width: 3,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

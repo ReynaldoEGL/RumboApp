@@ -15,6 +15,9 @@ import 'package:rumboapp/features/trips/domain/trip_energy_estimate.dart';
 import 'package:rumboapp/features/vehicles/application/vehicle_providers.dart';
 import 'package:rumboapp/features/vehicles/domain/vehicle.dart';
 
+import 'package:rumboapp/features/trips/presentation/widgets/trip_budget_card.dart';
+import 'package:rumboapp/features/trips/presentation/widgets/trip_budget_inputs.dart';
+
 class TripFormScreen extends ConsumerStatefulWidget {
   const TripFormScreen({super.key, this.trip, this.route})
     : assert(trip == null || route == null);
@@ -769,6 +772,17 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
           vehicleSnapshot?.electricConsumptionKwhPer100Km,
     );
 
+    final returnEnergyEstimate = selections.includeReturn
+        ? calculateTripEnergyEstimate(
+            fuelType: vehicleSnapshot?.fuelType,
+            distanceKm: selections.returnDistanceKm,
+            energyUnitPrice: selections.energyUnitPrice,
+            fuelConsumptionKmPerLiter: vehicleSnapshot?.fuelConsumptionKmPerLiter,
+            electricConsumptionKwhPer100Km:
+                vehicleSnapshot?.electricConsumptionKwhPer100Km,
+          )
+        : null;
+
     final priceLabel = vehicleSnapshot?.fuelType == 'electric'
         ? 'Precio por kWh'
         : 'Precio por litro';
@@ -930,6 +944,19 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
               ),
               const SizedBox(height: 16),
               _energyEstimateCard(estimate: estimate, selections: selections),
+              const SizedBox(height: 16),
+              TripBudgetInputs(formArgs: _formArgs),
+              const SizedBox(height: 16),
+              TripBudgetCard(
+                energy: estimate,
+                route: routeSnapshot,
+                currencyCode: selections.currencyCode,
+                lodgingNights: selections.lodgingNights,
+                lodgingNightlyRate: selections.lodgingNightlyRate,
+                includeReturn: selections.includeReturn,
+                returnEnergy: returnEnergyEstimate,
+                returnTollsAmount: selections.returnTollsAmount,
+              ),
               const SizedBox(height: 28),
               Text(
                 'Organización',
