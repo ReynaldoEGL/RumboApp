@@ -12,6 +12,7 @@ import 'package:rumboapp/features/road_routes/domain/route_toll.dart';
 import 'package:rumboapp/features/road_routes/domain/saved_road_route.dart';
 
 import 'package:rumboapp/features/road_routes/presentation/widgets/road_route_map.dart';
+import 'package:rumboapp/features/road_routes/presentation/widgets/current_location_button.dart';
 
 import 'package:rumboapp/features/trips/presentation/screens/trip_form_screen.dart';
 
@@ -392,6 +393,7 @@ class _RoadRoutesScreenState extends ConsumerState<RoadRoutesScreen> {
               },
               onSelect: _selectOrigin,
             ),
+            CurrentLocationButton(onLocationSelected: _selectOrigin),
             if (state.origin != null && state.destination != null)
               Align(
                 alignment: Alignment.centerRight,

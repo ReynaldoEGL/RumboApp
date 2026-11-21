@@ -10,14 +10,23 @@ import 'package:rumboapp/firebase_options.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializar Firebase con la configuración de la plataforma.
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // Registrar la licencia de la tipografía Manrope.
-  LicenseRegistry.addLicense(() async* {
-    final String license = await rootBundle.loadString(
-      'assets/fonts/manrope/OFL.txt',
+  try {
+    final firebaseApp = await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    debugPrint(
+      '[Rumbo] Firebase inicializado correctamente. '
+      'Proyecto: ${firebaseApp.options.projectId}',
+    );
+  } catch (error, stackTrace) {
+    debugPrint('[Rumbo] Error al inicializar Firebase: $error');
+    debugPrintStack(stackTrace: stackTrace);
+    rethrow;
+  }
+
+  LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString('assets/fonts/manrope/OFL.txt');
 
     yield LicenseEntryWithLineBreaks(['Manrope'], license);
   });

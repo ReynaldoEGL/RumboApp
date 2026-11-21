@@ -29,6 +29,17 @@
             "toolArgs": [
                 "--dart-define-from-file=dart_defines.json"
             ]
-        }
+        },
+        {
+            "name": "Rumbo Web (debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "${workspaceFolder}/lib/main.dart",
+            "deviceId": "chrome",
+            "flutterMode": "debug",
+            "toolArgs": [
+                "--dart-define-from-file=dart_defines.json"
+            ]
+        }    
     ]
 }
