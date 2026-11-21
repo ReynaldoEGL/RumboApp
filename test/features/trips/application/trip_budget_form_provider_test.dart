@@ -13,6 +13,7 @@ void main() {
       distanceKm: 200.0 as double?,
       energyUnitPrice: 24.0 as double?,
       currencyCode: 'MXN',
+      budgetPlan: null,
     );
 
     final container = ProviderContainer();

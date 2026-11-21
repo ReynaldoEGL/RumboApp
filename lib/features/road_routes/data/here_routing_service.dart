@@ -402,7 +402,7 @@ class HereRoutingService {
       'unknownError' =>
         'El servicio no pudo determinar cómo calcular este recorrido.',
       _ =>
-        'HERE no pudo completar el cálculo del recorrido. '
+        'No se pudo completar el cálculo del recorrido. '
             'Comprueba los puntos seleccionados e inténtalo nuevamente.',
     };
   }

@@ -160,7 +160,7 @@ class TripBudgetCard extends StatelessWidget {
               const SizedBox(height: 16),
               _BudgetLine(
                 icon: Icons.toll_outlined,
-                label: 'Peajes de regreso (manual)',
+                label: 'Peajes de regreso',
                 value: returnTollsAmount == null
                     ? 'Pendiente de especificar'
                     : _money(returnTollsAmount!, budget.currencyCode),
@@ -213,7 +213,7 @@ class TripBudgetCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Todos los precios manuales se interpretan en ${budget.currencyCode}; ',
+              'Los precios que ingreses se expresan en ${budget.currencyCode}. ',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 height: 1.4,

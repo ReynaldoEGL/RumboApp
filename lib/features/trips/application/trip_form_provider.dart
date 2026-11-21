@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:rumboapp/features/trips/domain/trip.dart';
+import 'package:rumboapp/features/trips/domain/trip_budget_plan.dart';
 
 typedef TripFormArgs = ({
   Object sessionKey,
@@ -9,6 +10,7 @@ typedef TripFormArgs = ({
   double? distanceKm,
   double? energyUnitPrice,
   String currencyCode,
+  TripBudgetPlan? budgetPlan,
 });
 
 class TripFormSelections {
@@ -98,6 +100,11 @@ class TripFormController extends Notifier<TripFormSelections> {
       distanceKm: initialValues.distanceKm,
       energyUnitPrice: initialValues.energyUnitPrice,
       currencyCode: initialValues.currencyCode,
+      lodgingNights: initialValues.budgetPlan?.lodgingNights,
+      lodgingNightlyRate: initialValues.budgetPlan?.lodgingNightlyRate,
+      includeReturn: initialValues.budgetPlan?.includeReturn ?? false,
+      returnDistanceKm: initialValues.budgetPlan?.returnDistanceKm,
+      returnTollsAmount: initialValues.budgetPlan?.returnTollsAmount,
     );
   }
 

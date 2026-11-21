@@ -91,6 +91,7 @@ void main() {
         distanceKm: null,
         energyUnitPrice: null,
         currencyCode: 'USD',
+        budgetPlan: null,
       );
 
       final secondProvider = tripFormProvider(secondArgs);
@@ -127,6 +128,7 @@ class _Harness {
     distanceKm: 250.0,
     energyUnitPrice: 25.0,
     currencyCode: 'MXN',
+    budgetPlan: null,
   );
 
   late final provider = tripFormProvider(args);

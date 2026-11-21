@@ -227,6 +227,7 @@ class _TripCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final estimate = trip.energyEstimate;
     final route = trip.routeSnapshot;
+    final budget = trip.budgetPlan == null ? null : trip.budgetEstimate;
 
     return Card(
       elevation: 0,
@@ -409,6 +410,36 @@ class _TripCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   'Estimación parcial: no incluye consumo eléctrico.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ],
+            if (budget != null) ...[
+              const SizedBox(height: 14),
+              const Divider(),
+              const SizedBox(height: 8),
+              Text(
+                'Presupuesto estimado',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                budget.hasKnownCosts
+                    ? '${budget.currencyCode} ${budget.knownSubtotal.toStringAsFixed(2)}'
+                    : 'Pendiente de calcular',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: colorScheme.primary,
+                ),
+              ),
+              if (budget.isPartial) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'Faltan algunos importes para completar el presupuesto.',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),

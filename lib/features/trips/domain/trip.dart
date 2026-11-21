@@ -1,5 +1,7 @@
 import 'package:rumboapp/features/road_routes/domain/road_route.dart';
 import 'package:rumboapp/features/trips/domain/trip_energy_estimate.dart';
+import 'package:rumboapp/features/trips/domain/trip_budget_plan.dart';
+import 'package:rumboapp/features/trips/domain/trip_budget_estimate.dart';
 import 'package:rumboapp/features/vehicles/domain/vehicle.dart';
 
 enum TripStatus { planned, inProgress, completed, cancelled }
@@ -95,6 +97,7 @@ class Trip {
     this.distanceKm,
     this.energyUnitPrice,
     this.routeSnapshot,
+    this.budgetPlan,
     this.notes,
   });
 
@@ -109,6 +112,7 @@ class Trip {
   final double? distanceKm;
   final double? energyUnitPrice;
   final RoadRoute? routeSnapshot;
+  final TripBudgetPlan? budgetPlan;
   final String currencyCode;
   final TripStatus status;
   final String? notes;
@@ -130,6 +134,33 @@ class Trip {
       energyUnitPrice: energyUnitPrice,
       fuelConsumptionKmPerLiter: snapshot.fuelConsumptionKmPerLiter,
       electricConsumptionKwhPer100Km: snapshot.electricConsumptionKwhPer100Km,
+    );
+  }
+
+  TripBudgetEstimate get budgetEstimate {
+    final plan = budgetPlan;
+    final vehicle = vehicleSnapshot;
+
+    final returnEnergy = plan?.includeReturn == true && vehicle != null
+        ? calculateTripEnergyEstimate(
+            fuelType: vehicle.fuelType,
+            distanceKm: plan?.returnDistanceKm,
+            energyUnitPrice: energyUnitPrice,
+            fuelConsumptionKmPerLiter: vehicle.fuelConsumptionKmPerLiter,
+            electricConsumptionKwhPer100Km:
+                vehicle.electricConsumptionKwhPer100Km,
+          )
+        : null;
+
+    return calculateTripBudgetEstimate(
+      energy: energyEstimate,
+      route: routeSnapshot,
+      currencyCode: currencyCode,
+      lodgingNights: plan?.lodgingNights,
+      lodgingNightlyRate: plan?.lodgingNightlyRate,
+      includeReturn: plan?.includeReturn ?? false,
+      returnEnergy: returnEnergy,
+      returnTollsAmount: plan?.returnTollsAmount,
     );
   }
 
@@ -157,6 +188,7 @@ class Trip {
 
     _validateOptionalPositiveNumber(distanceKm, 'La distancia');
     _validateOptionalPositiveNumber(energyUnitPrice, 'El precio energético');
+    budgetPlan?.validate();
 
     if (vehicleId != null && vehicleId!.trim().isEmpty) {
       throw const FormatException(
@@ -226,7 +258,7 @@ class Trip {
     validate();
 
     return {
-      'schemaVersion': 1,
+      'schemaVersion': budgetPlan == null ? 1 : 2,
       'title': title.trim(),
       'origin': origin.trim(),
       'destination': destination.trim(),
@@ -242,6 +274,7 @@ class Trip {
       if (distanceKm != null) 'distanceKm': distanceKm,
       if (energyUnitPrice != null) 'energyUnitPrice': energyUnitPrice,
       if (routeSnapshot != null) 'routeSnapshot': routeSnapshot!.toMap(),
+      if (budgetPlan != null) 'budgetPlan': budgetPlan!.toMap(),
       if (notes != null && notes!.trim().isNotEmpty) 'notes': notes!.trim(),
     };
   }
@@ -254,6 +287,7 @@ class Trip {
 
     final rawVehicleSnapshot = data['vehicleSnapshot'];
     final rawRouteSnapshot = data['routeSnapshot'];
+    final rawBudgetPlan = data['budgetPlan'];
 
     if (rawVehicleSnapshot is Map) {
       vehicleSnapshot = TripVehicleSnapshot.fromMap(
@@ -264,6 +298,14 @@ class Trip {
     if (rawRouteSnapshot is Map) {
       routeSnapshot = RoadRoute.fromMap(
         Map<Object?, Object?>.from(rawRouteSnapshot),
+      );
+    }
+
+    TripBudgetPlan? budgetPlan;
+
+    if (rawBudgetPlan is Map) {
+      budgetPlan = TripBudgetPlan.fromMap(
+        Map<Object?, Object?>.from(rawBudgetPlan),
       );
     }
 
@@ -281,6 +323,7 @@ class Trip {
       distanceKm: _positiveDouble(data['distanceKm']),
       energyUnitPrice: _positiveDouble(data['energyUnitPrice']),
       routeSnapshot: routeSnapshot,
+      budgetPlan: budgetPlan,
       currencyCode: _currencyCode(data['currencyCode']),
       status: TripStatusPresentation.fromValue(data['status']),
       notes: _optionalString(data['notes']),

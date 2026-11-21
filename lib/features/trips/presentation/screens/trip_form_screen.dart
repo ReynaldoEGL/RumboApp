@@ -10,6 +10,7 @@ import 'package:rumboapp/features/trips/application/trip_form_provider.dart';
 import 'package:rumboapp/features/trips/application/trip_providers.dart';
 
 import 'package:rumboapp/features/trips/domain/trip.dart';
+import 'package:rumboapp/features/trips/domain/trip_budget_plan.dart';
 import 'package:rumboapp/features/trips/domain/trip_energy_estimate.dart';
 
 import 'package:rumboapp/features/vehicles/application/vehicle_providers.dart';
@@ -68,6 +69,7 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
       distanceKm: trip?.distanceKm ?? route?.distanceKilometers,
       energyUnitPrice: trip?.energyUnitPrice,
       currencyCode: trip?.currencyCode ?? 'MXN',
+      budgetPlan: trip?.budgetPlan,
     );
   }
 
@@ -674,6 +676,13 @@ class _TripFormScreenState extends ConsumerState<TripFormScreen> {
       distanceKm: distanceKm,
       energyUnitPrice: energyPrice,
       routeSnapshot: routeSnapshot,
+      budgetPlan: TripBudgetPlan(
+        lodgingNights: selections.lodgingNights,
+        lodgingNightlyRate: selections.lodgingNightlyRate,
+        includeReturn: selections.includeReturn,
+        returnDistanceKm: selections.returnDistanceKm,
+        returnTollsAmount: selections.returnTollsAmount,
+      ),
       currencyCode: currencyCode,
       status: selections.status,
       notes: _readOptionalText(_notesController),

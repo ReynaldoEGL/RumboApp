@@ -452,7 +452,7 @@ class RoadRoutePlannerController extends Notifier<RoadRoutePlannerState> {
         selectedRouteId: routes.isEmpty ? null : routes.first.id,
         clearSelectedRouteId: routes.isEmpty,
         routeCalculationMessage: routes.isEmpty
-            ? 'HERE no encontró una ruta entre esos puntos. Prueba seleccionando ubicaciones cercanas a una carretera.'
+            ? 'No se encontró una ruta entre esos puntos. Prueba seleccionando ubicaciones cercanas a una carretera.'
             : null,
         clearRouteCalculationMessage: routes.isNotEmpty,
       );
